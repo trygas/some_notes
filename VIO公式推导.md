@@ -140,6 +140,8 @@ $$
 $$
 \mathbf{b}_{i}^{g}=\mathbf{b}_{i+1}^{g}=\ldots=\mathbf{b}_{j-1}^{g}, \quad \mathbf{b}_{i}^{a}=\mathbf{b}_{i+1}^{a}=\ldots=\mathbf{b}_{j-1}^{a}
 $$
+##### IMU测量值预积分
+
 我们首先假设Bias不动,仅讨论噪声,然后再讨论Bias.如果仅讨论噪声,则公式23,24,25可以如下表示
 $$
 \Delta \mathrm{R}_{i j} \stackrel{}{\simeq} \prod_{k=i}^{j-1}\left[\operatorname{Exp} \left(\left(\tilde{\boldsymbol{\omega}}_{k}-\mathbf{b}_{i}^{g}\right) \Delta t\right) \operatorname{Exp}\left(-\mathrm{J}_{r}^{k} \boldsymbol{\eta}_{k}^{g d} \Delta t\right)\right]
@@ -163,6 +165,8 @@ $$
 $$
 \begin{align} \Delta \tilde{\mathrm{R}}_{i j} &=\mathrm{R}_{i}^{\mathrm{T}} \mathrm{R}_{j} \operatorname{Exp}\left(\delta \phi_{i j}\right) \\ \Delta \tilde{\mathbf{v}}_{i j} &=\mathrm{R}_{i}^{\top}\left(\mathbf{v}_{j}-\mathbf{v}_{i}-\mathbf{g} \Delta t_{i j}\right)+\delta \mathbf{v}_{i j} \\ \Delta \tilde{\mathbf{p}}_{i j} &=\mathrm{R}_{i}^{\top}\left(\mathbf{p}_{j}-\mathbf{p}_{i}-\mathbf{v}_{i} \Delta t_{i j}-\frac{1}{2} \mathbf{g} \Delta t_{i j}^{2}\right)+\delta \mathbf{p}_{i j} \end{align}
 $$
+##### 噪声更新
+
 我们的测量值写成测量值(这里面包含Bias)加随机噪声的形式,随机噪声描述为随机向量$\left[\delta \phi_{i j}^{\top}, \delta \mathbf{v}_{i j}^{\top}, \delta \mathbf{p}_{i j}^{\top}\right]^{\top}$.因为噪声是零均值高斯分布,所以噪声的形式如下,
 $$
 \boldsymbol{\eta}_{i j}^{\Delta} \doteq\left[\delta \boldsymbol{\phi}_{i j}^{\top}, \delta \mathbf{v}_{i j}^{\top}, \delta \mathbf{p}_{i j}^{\top}\right]^{\top} \sim \mathcal{N}\left(\mathbf{0}_{9 \times 1}, \boldsymbol{\Sigma}_{i j}\right)
@@ -192,6 +196,17 @@ $$
 
 因为公式36,37,38表示预积分噪音$\eta_{i j}^{\Delta}$是IMU测量噪声$\boldsymbol{\eta}_{k}^{d} \doteq\left[\boldsymbol{\eta}_{k}^{g {d}}, \boldsymbol{\eta}_{k}^{a d}\right]$的线性函数,所以我们通过简单的线性函数可以计算出$\boldsymbol{\eta}_{k}^{d}$的协方差矩阵,称为$\boldsymbol{\Sigma}_{i j}$,具体见附录.
 
+##### 合并偏置更新
+
+在前面我们没考虑到bias的变化,我们默认bias没有变化,但是在优化的时候,bias测量值会有一个小值变化$\delta b$,有一种方法就是在变化的时候重新计算delta值,但是这计算量太大了.相反,如果bias更新了$\mathbf{b} \leftarrow \overline{\mathbf{b}}+\delta \mathbf{b}$,我们可以通过一阶展开更新delta值,
+$$
+\begin{align} 
+\Delta \tilde{\mathrm{R}}_{i j}\left(\mathbf{b}_{i}^{g}\right) \simeq \Delta \tilde{\mathrm{R}}_{i j}\left(\overline{\mathbf{b}}_{i}^{g}\right) \operatorname{Exp}\left(\frac{\partial \Delta \overline{\mathrm{R}}_{i j}}{\partial \mathrm{b}^{g}} \delta \mathbf{b}^{g}\right)
+\\ \Delta \tilde{\mathbf{v}}_{i j}\left(\mathbf{b}_{i}^{g}, \mathbf{b}_{i}^{a}\right) \simeq \Delta \tilde{\mathbf{v}}_{i j}\left(\overline{\mathbf{b}}_{i}^{g}, \overline{\mathbf{b}}_{i}^{a}\right)+\frac{\partial \Delta \overline{\mathbf{v}}_{i j}}{\partial \mathbf{b}^{g}} \delta \mathbf{b}_{i}^{g}+\frac{\partial \Delta \overline{\mathbf{v}}_{i j}}{\partial \mathbf{b}^{a}} \delta \mathbf{b}_{i}^{a} 
+\\ \Delta \tilde{\mathbf{p}}_{i j}\left(\mathbf{b}_{i}^{g}, \mathbf{b}_{i}^{a}\right)  \simeq \Delta \tilde{\mathbf{p}}_{i j}\left(\overline{\mathbf{b}}_{i}^{g}, \overline{\mathbf{b}}_{i}^{a}\right)+\frac{\partial \Delta \overline{\mathbf{p}}_{i j}}{\partial \mathbf{b}^{g}} \delta \mathbf{b}_{i}^{g}+\frac{\partial \Delta \overline{\mathbf{p}}_{i j}}{\partial \mathbf{b}^{a}} \delta \mathbf{b}_{i}^{a} \end{align}
+$$
+这个雅克比是一个常数并且可以在预积分阶段预先计算出来.
+
 ### 附录
 
 ##### 计算预积分噪声协方差矩阵
@@ -212,4 +227,34 @@ $$
 
 $$
 \delta \mathbf{p}_{i j}\begin{aligned}=\delta \mathbf{p}_{i j-1} &+\delta \mathbf{v}_{i j-1} \Delta t-\frac{1}{2} \Delta \tilde{\mathrm{R}}_{i j-1}\left(\tilde{\mathbf{a}}_{j-1}-\mathbf{b}_{i}^{a}\right)^{\wedge} \delta \boldsymbol{\phi}_{i j-1} \Delta t^{2} +\frac{1}{2} \Delta \tilde{\mathrm{R}}_{i j-1} \boldsymbol{\eta}_{j-1}^{a d} \Delta t^{2} \end{aligned}
+$$
+
+然后我们可以得到以下公式,
+$$
+\boldsymbol{\eta}_{i j}^{\Delta}=\mathbf{A}_{j-1} \boldsymbol{\eta}_{i j-1}^{\Delta}+\mathbf{B}_{j-1} \boldsymbol{\eta}_{j-1}^{d}
+$$
+从公式中我们可以得到IMU测量数据噪声$\eta_{k}^{d}​$协方差矩阵$\boldsymbol{\Sigma}_{\boldsymbol{\eta}} \in \mathbb{R}^{6 \times 6}​$
+$$
+\mathbf{\Sigma}_{i j}=\mathbf{A}_{j-1} \boldsymbol{\Sigma}_{i j-1} \mathbf{A}_{j-1}^{\top}+\mathbf{B}_{j-1} \mathbf{\Sigma}_{\eta} \mathbf{B}_{j-1}^{\top}
+$$
+初始值$\boldsymbol{\Sigma}_{i i}=\mathbf{0}_{9 \times 9}$.
+
+##### 通过一阶展开修正Bias
+
+首先假设我们通过给定的bias$\overline{\mathbf{b}}_{i} \doteq \left[ \begin{array}{ll}{\overline{\mathbf{b}}_{i}^{g}} & {\overline{\mathbf{b}}_{i}^{a}}\end{array}\right]$计算出来预积分值,然后我们得到以下值,
+$$
+\Delta \overline{\mathrm{R}}_{i j} \doteq \Delta \tilde{\mathrm{R}}_{i j}\left(\overline{\mathbf{b}}_{i}\right), \Delta \overline{\mathbf{v}}_{i j} \doteq \Delta \tilde{\mathbf{v}}_{i j}\left(\overline{\mathbf{b}}_{i}\right), \Delta \overline{\mathbf{p}}_{i j} \doteq \Delta \tilde{\mathbf{p}}_{i j}\left(\overline{\mathbf{b}}_{i}\right)
+$$
+
+我们的目标是获得一个更新bias变化后的值,我们有一个新的测量值,$\hat{\mathbf{b}}_{i} \leftarrow \overline{\mathbf{b}}_{i}+\delta \mathbf{b}_{i}$,
+$$
+\Delta \tilde{\mathrm{R}}_{i j}\left(\hat{\mathbf{b}}_{i}\right)=\prod_{k=i}^{j-1} \operatorname{Exp}\left(\left(\tilde{\omega}_{k}-\hat{\mathbf{b}}_{i}^{g}\right) \Delta t\right)
+$$
+我们将$\hat{\mathbf{b}}_{i}=\overline{\mathbf{b}}_{i}+\delta \mathbf{b}_{i}$代入上式,得到,
+$$
+\begin{align} \Delta \tilde{\mathrm{R}}_{i j}\left(\hat{\mathbf{b}}_{i}\right) &=\prod_{k=i}^{j-1} \operatorname{Exp}\left(\left(\tilde{\boldsymbol{\omega}}_{k}-\left(\tilde{\mathbf{b}}_{i}^{g}+\delta \mathbf{b}_{i}^{g}\right)\right) \Delta t\right) \\ & \simeq \prod_{k=i}^{j-1} \operatorname{Exp}\left(\left(\tilde{\boldsymbol{\omega}}_{k}-\overline{\mathbf{b}}_{i}^{g}\right) \Delta t\right) \operatorname{Exp}\left(-\mathbf{J}_{r}^{k} \delta \mathbf{b}_{i}^{g} \Delta t\right) \end{align}
+$$
+然后整理得,
+$$
+\Delta \tilde{\mathrm{R}}_{i j}\left(\hat{\mathbf{b}}_{i}\right)=\Delta \overline{\mathrm{R}}_{i j} \prod_{k=i}^{j-1} \operatorname{Exp}\left(-\Delta \tilde{\mathrm{R}}_{k+1 j}\left(\overline{\mathbf{b}}_{i}\right)^{\top} \mathrm{J}_{r}^{k} \delta \mathbf{b}_{i}^{g} \Delta t\right), \quad(67)
 $$
