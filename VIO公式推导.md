@@ -220,6 +220,8 @@ $$
  \mathbf{r}_{\Delta \mathbf{p}_{i j}}  \doteq \mathrm{R}_{i}^{\top}\left(\mathbf{p}_{j}-\mathbf{p}_{i}-\mathbf{v}_{i} \Delta t_{i j}-\frac{1}{2} \mathbf{g} \Delta t_{i j}^{2}\right)-\left[\Delta \tilde{\mathbf{p}}_{i j}\left(\overline{\mathbf{b}}_{i}^{g}, \overline{\mathbf{b}}_{i}^{a}\right)+\frac{\partial \Delta \overline{\mathbf{p}}_{i j}}{\partial \mathbf{b}^{g}} \delta \mathbf{b}^{g}+\frac{\partial \Delta \overline{\mathbf{p}}_{i j}}{\partial \mathbf{b}_{a}} \delta \mathbf{b}^{a}\right]
 $$
 
+##### 偏置模型
+
 
 
 
@@ -378,4 +380,3 @@ $$
 在上面的公式中,$E \doteq \operatorname{Exp}\left(\frac{\partial \Delta \overline{\mathrm{R}}_{i j}}{\partial \mathrm{b}^{g}} \delta \mathbf{b}^{g}\right)$,$\mathrm{J}_{r}^{b} \doteq \mathrm{J}_{r}\left(\frac{\partial \Delta \overline{\mathrm{R}}_{i j}}{\partial \mathrm{b}^{g}} \delta \mathrm{b}_{i}^{g}\right)​$
 
 ![](/home/liu/Documents/some_notes/VIO公式推导/r_rij公式合集.png)
-
