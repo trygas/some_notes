@@ -1,3 +1,5 @@
+[TOC]
+
 # VIO
 
 ### 为什么要VIO
@@ -161,7 +163,7 @@ $$
 \\\stackrel{}{=} \Delta \tilde{\mathbf{p}}_{i j}+\sum_{k=i}^{j-1}\left[-\delta \mathbf{v}_{i k} \Delta t+\frac{1}{2} \Delta \tilde{\mathrm{R}}_{i k}\left(\tilde{\mathbf{a}}_{k}-\mathbf{b}_{i}^{a}\right)^{\wedge} \delta \boldsymbol{\phi}_{i k} \Delta t^{2}\right.-\frac{1}{2} \Delta \tilde{\mathrm{R}}_{i k} \boldsymbol{\eta}_{k}^{a d} \Delta t^{2} ]
 \\ \doteq \Delta \tilde{\mathbf{p}}_{i j}-\delta \mathbf{p}_{i j}
 $$
-将公式28,29,30代入到23,24,25中,我们就能获得预积分测量模型(记住$\operatorname{Exp}\left(-\delta \phi_{i j}\right)^{\mathrm{T}}=\operatorname{Exp}\left(\delta \boldsymbol{\phi}_{i j}\right)$)
+将公式28,29,30代入到23,24,25中,我们就能获得预积分测量模型(记住$\operatorname{Exp}\left(-\delta \phi_{i j}\right)^{\mathrm{T}}=\operatorname{Exp}\left(\delta \boldsymbol{\phi}_{i j}\right)​$)
 $$
 \begin{align} \Delta \tilde{\mathrm{R}}_{i j} &=\mathrm{R}_{i}^{\mathrm{T}} \mathrm{R}_{j} \operatorname{Exp}\left(\delta \phi_{i j}\right) \\ \Delta \tilde{\mathbf{v}}_{i j} &=\mathrm{R}_{i}^{\top}\left(\mathbf{v}_{j}-\mathbf{v}_{i}-\mathbf{g} \Delta t_{i j}\right)+\delta \mathbf{v}_{i j} \\ \Delta \tilde{\mathbf{p}}_{i j} &=\mathrm{R}_{i}^{\top}\left(\mathbf{p}_{j}-\mathbf{p}_{i}-\mathbf{v}_{i} \Delta t_{i j}-\frac{1}{2} \mathbf{g} \Delta t_{i j}^{2}\right)+\delta \mathbf{p}_{i j} \end{align}
 $$
@@ -198,14 +200,30 @@ $$
 
 ##### 合并偏置更新
 
-在前面我们没考虑到bias的变化,我们默认bias没有变化,但是在优化的时候,bias测量值会有一个小值变化$\delta b$,有一种方法就是在变化的时候重新计算delta值,但是这计算量太大了.相反,如果bias更新了$\mathbf{b} \leftarrow \overline{\mathbf{b}}+\delta \mathbf{b}$,我们可以通过一阶展开更新delta值,
+在前面我们没考虑到bias的变化,我们默认bias没有变化,但是在优化的时候,bias测量值会有一个小值变化$\delta b​$,有一种方法就是在变化的时候重新计算delta值,但是这计算量太大了.相反,如果bias更新了$\mathbf{b} \leftarrow \overline{\mathbf{b}}+\delta \mathbf{b}​$,我们可以通过一阶展开更新delta值,
 $$
 \begin{align} 
 \Delta \tilde{\mathrm{R}}_{i j}\left(\mathbf{b}_{i}^{g}\right) \simeq \Delta \tilde{\mathrm{R}}_{i j}\left(\overline{\mathbf{b}}_{i}^{g}\right) \operatorname{Exp}\left(\frac{\partial \Delta \overline{\mathrm{R}}_{i j}}{\partial \mathrm{b}^{g}} \delta \mathbf{b}^{g}\right)
 \\ \Delta \tilde{\mathbf{v}}_{i j}\left(\mathbf{b}_{i}^{g}, \mathbf{b}_{i}^{a}\right) \simeq \Delta \tilde{\mathbf{v}}_{i j}\left(\overline{\mathbf{b}}_{i}^{g}, \overline{\mathbf{b}}_{i}^{a}\right)+\frac{\partial \Delta \overline{\mathbf{v}}_{i j}}{\partial \mathbf{b}^{g}} \delta \mathbf{b}_{i}^{g}+\frac{\partial \Delta \overline{\mathbf{v}}_{i j}}{\partial \mathbf{b}^{a}} \delta \mathbf{b}_{i}^{a} 
 \\ \Delta \tilde{\mathbf{p}}_{i j}\left(\mathbf{b}_{i}^{g}, \mathbf{b}_{i}^{a}\right)  \simeq \Delta \tilde{\mathbf{p}}_{i j}\left(\overline{\mathbf{b}}_{i}^{g}, \overline{\mathbf{b}}_{i}^{a}\right)+\frac{\partial \Delta \overline{\mathbf{p}}_{i j}}{\partial \mathbf{b}^{g}} \delta \mathbf{b}_{i}^{g}+\frac{\partial \Delta \overline{\mathbf{p}}_{i j}}{\partial \mathbf{b}^{a}} \delta \mathbf{b}_{i}^{a} \end{align}
 $$
-这个雅克比是一个常数并且可以在预积分阶段预先计算出来.
+这个雅克比是一个常数并且可以在预积分阶段预先计算出来我们在附录中给出推导过程.
+
+##### 预积分IMU因子
+
+有了上面推导的公式,我们能写出残余误差$\mathbf{r}_{\mathcal{I}_{i j}} \doteq\left[\mathbf{r}_{\Delta \mathrm{R}_{i j}}^{\top}, \mathbf{r}_{\Delta \mathbf{v} i j}^{\top}, \mathbf{r}_{\Delta \mathbf{p} i j}^{\top}\right]^{\top} \in \mathbb{R}^{9}$的公式,
+$$
+\mathbf{r}_{\Delta \mathrm{R}_{i j}} \doteq \mathbf{Log} \left(\left(\Delta \tilde{\mathrm{R}}_{i j}\left(\overline{\mathbf{b}}_{i}^{g}\right) \operatorname{Exp}\left(\frac{\partial \Delta \overline{\mathrm{R}}_{i j}}{\partial \mathbf{b}^{g}} \delta \mathbf{b}^{g}\right)\right)^{\top} \mathrm{R}_{i}^{\mathrm{T}} \mathrm{R}_{j}\right)
+\\
+\mathbf{r}_{\Delta \mathbf{v}_{i j}}  \doteq \mathrm{R}_{i}^{\top}\left(\mathbf{v}_{j}-\mathbf{v}_{i}-\mathbf{g} \Delta t_{i j}\right) -\left[\Delta \tilde{\mathbf{v}}_{i j}\left(\overline{\mathbf{b}}_{i}^{g}, \overline{\mathbf{b}}_{i}^{a}\right)+\frac{\partial \Delta \overline{\mathbf{v}}_{i j}}{\partial \mathbf{b}^{g}} \delta \mathbf{b}^{g}+\frac{\partial \Delta \overline{\mathbf{v}}_{i j}}{\partial \mathbf{b}^{a}} \delta \mathbf{b}^{a}\right] 
+\\
+ \mathbf{r}_{\Delta \mathbf{p}_{i j}}  \doteq \mathrm{R}_{i}^{\top}\left(\mathbf{p}_{j}-\mathbf{p}_{i}-\mathbf{v}_{i} \Delta t_{i j}-\frac{1}{2} \mathbf{g} \Delta t_{i j}^{2}\right)-\left[\Delta \tilde{\mathbf{p}}_{i j}\left(\overline{\mathbf{b}}_{i}^{g}, \overline{\mathbf{b}}_{i}^{a}\right)+\frac{\partial \Delta \overline{\mathbf{p}}_{i j}}{\partial \mathbf{b}^{g}} \delta \mathbf{b}^{g}+\frac{\partial \Delta \overline{\mathbf{p}}_{i j}}{\partial \mathbf{b}_{a}} \delta \mathbf{b}^{a}\right]
+$$
+
+
+
+
+
 
 ### 附录
 
@@ -241,7 +259,9 @@ $$
 
 ##### 通过一阶展开修正Bias
 
-首先假设我们通过给定的bias$\overline{\mathbf{b}}_{i} \doteq \left[ \begin{array}{ll}{\overline{\mathbf{b}}_{i}^{g}} & {\overline{\mathbf{b}}_{i}^{a}}\end{array}\right]$计算出来预积分值,然后我们得到以下值,
+这里我们给出公式40,41,42的推导过程.
+
+首先假设我们通过给定的bias$\overline{\mathbf{b}}_{i} \doteq \left[ \begin{array}{ll}{\overline{\mathbf{b}}_{i}^{g}} & {\overline{\mathbf{b}}_{i}^{a}}\end{array}\right]$计算出来预积分值,然后我们得到以下值,(在这里面的值是没有噪声值的)
 $$
 \Delta \overline{\mathrm{R}}_{i j} \doteq \Delta \tilde{\mathrm{R}}_{i j}\left(\overline{\mathbf{b}}_{i}\right), \Delta \overline{\mathbf{v}}_{i j} \doteq \Delta \tilde{\mathbf{v}}_{i j}\left(\overline{\mathbf{b}}_{i}\right), \Delta \overline{\mathbf{p}}_{i j} \doteq \Delta \tilde{\mathbf{p}}_{i j}\left(\overline{\mathbf{b}}_{i}\right)
 $$
@@ -254,7 +274,108 @@ $$
 $$
 \begin{align} \Delta \tilde{\mathrm{R}}_{i j}\left(\hat{\mathbf{b}}_{i}\right) &=\prod_{k=i}^{j-1} \operatorname{Exp}\left(\left(\tilde{\boldsymbol{\omega}}_{k}-\left(\tilde{\mathbf{b}}_{i}^{g}+\delta \mathbf{b}_{i}^{g}\right)\right) \Delta t\right) \\ & \simeq \prod_{k=i}^{j-1} \operatorname{Exp}\left(\left(\tilde{\boldsymbol{\omega}}_{k}-\overline{\mathbf{b}}_{i}^{g}\right) \Delta t\right) \operatorname{Exp}\left(-\mathbf{J}_{r}^{k} \delta \mathbf{b}_{i}^{g} \Delta t\right) \end{align}
 $$
-然后整理得,
+然后整理,前一项的第二个Exp和后一项的第一个Exp调用公式$\operatorname{Exp}(\phi) \mathrm{R}=\mathrm{R} \operatorname{Exp}\left(\mathrm{R}^{\top} \boldsymbol{\phi}\right)$,得,
 $$
-\Delta \tilde{\mathrm{R}}_{i j}\left(\hat{\mathbf{b}}_{i}\right)=\Delta \overline{\mathrm{R}}_{i j} \prod_{k=i}^{j-1} \operatorname{Exp}\left(-\Delta \tilde{\mathrm{R}}_{k+1 j}\left(\overline{\mathbf{b}}_{i}\right)^{\top} \mathrm{J}_{r}^{k} \delta \mathbf{b}_{i}^{g} \Delta t\right), \quad(67)
+\Delta \tilde{\mathrm{R}}_{i j}\left(\hat{\mathbf{b}}_{i}\right)=\Delta \overline{\mathrm{R}}_{i j} \prod_{k=i}^{j-1} \operatorname{Exp}\left(-\Delta \tilde{\mathrm{R}}_{k+1 j}\left(\overline{\mathbf{b}}_{i}\right)^{\top} \mathrm{J}_{r}^{k} \delta \mathbf{b}_{i}^{g} \Delta t\right)
+\\ =\Delta \overline{\mathrm{R}}_{i j} \operatorname{Exp}\left(\frac{\partial \Delta \overline{\mathrm{R}}_{i j}}{\partial \mathbf{b}^{g}} \delta \mathbf{b}_{i}^{g}\right)
 $$
+下面我们要推$\Delta \tilde{\mathbf{v}}_{i j}\left(\hat{\mathbf{b}}_{i}\right)​$的公式,代入上式,即可得到,
+$$
+\Delta \tilde{\mathbf{v}}_{i j}\left(\hat{\mathbf{b}}_{i}\right)=\sum_{k=i}^{j-1} \Delta \tilde{\mathbf{R}}_{i k}\left(\hat{\mathbf{b}}_{i}\right)\left(\tilde{\mathbf{a}}_{k}-\overline{\mathbf{b}}_{i}^{a}-\delta \mathbf{b}_{i}^{a}\right) \Delta t
+\\ \stackrel{}{\simeq} \sum_{k=i}^{j-1} \Delta \overline{\mathrm{R}}_{i k} \operatorname{Exp}\left(\frac{\partial \Delta \overline{\mathrm{R}}_{i k}}{\partial \mathbf{b}^{g}} \delta \mathbf{b}_{i}^{g}\right)\left(\tilde{\mathbf{a}}_{k}-\overline{\mathbf{b}}_{i}^{a}-\delta \mathbf{b}_{i}^{a}\right) \Delta t
+\\\stackrel{\mathbb{}}{\simeq} \sum_{k=i}^{j-1} \Delta \overline{\mathrm{R}}_{i k}\left(\mathbf{I}+\left(\frac{\partial \Delta \overline{\mathrm{R}}_{i k}}{\partial \mathbf{b}^{g}} \delta \mathbf{b}_{i}^{g}\right)^{\wedge}\right)\left(\tilde{\mathbf{a}}_{k}-\overline{\mathbf{b}}_{i}^{a}-\delta \mathbf{b}_{i}^{a}\right) \Delta t
+$$
+展开后有一项$\delta \mathbf{b}_{i}^{g}$乘$\delta \mathbf{b}_{i}^{a}$,这已经是二次小值,所以直接略过得,
+$$
+\stackrel{}{\simeq} \Delta \overline{\mathbf{v}}_{i j}-\sum_{k=i}^{j-1} \Delta \overline{\mathrm{R}}_{i k} \Delta t \delta \mathbf{b}_{i}^{a}+\sum_{k=i}^{j-1} \Delta \overline{\mathrm{R}}_{i k}\left(\frac{\partial \Delta \overline{\mathrm{R}}_{i k}}{\partial \mathbf{b}^{g}} \delta \mathbf{b}_{i}^{g}\right)^{\wedge}\left(\tilde{\mathbf{a}}_{k}-\overline{\mathbf{b}}_{i}^{a}\right) \Delta t
+\\\stackrel{}{=} \Delta \overline{\mathbf{v}}_{i j}-\sum_{k=i}^{j-1} \Delta \overline{\mathrm{R}}_{i k} \Delta t \delta \mathbf{b}_{i}^{a}-\sum_{k=i}^{j-1} \Delta \overline{\mathrm{R}}_{i k}\left(\tilde{\mathbf{a}}_{k}-\overline{\mathbf{b}}_{i}^{a}\right)^{\wedge} \frac{\partial \Delta \overline{\mathrm{R}}_{i k}}{\partial \mathbf{b}^{g}} \Delta t \delta \mathbf{b}_{i}^{g}
+\\=\Delta \overline{\mathbf{v}}_{i j}+\frac{\partial \Delta \overline{\mathbf{v}}_{i j}}{\partial \mathbf{b}^{a}} \delta \mathbf{b}_{i}^{a}+\frac{\partial \Delta \overline{\mathbf{v}}_{i j}}{\partial \mathbf{b}^{g}} \delta \mathbf{b}_{i}^{g}
+$$
+$\Delta \tilde{\mathbf{p}}_{i j}\left(\hat{\mathbf{b}}_{i}\right)$的推导和上面差不多,这里直接列出答案,
+$$
+\begin{align} \frac{\partial \Delta \overline{\mathrm{R}}_{i j}}{\partial \mathbf{b}_{i j}} &=-\sum_{k=i}^{j-1}\left[\Delta \tilde{\mathrm{R}}_{k+1 j}\left(\overline{\mathbf{b}}_{i}\right)^{\top} \mathrm{J}_{r}^{k} \Delta t\right] \\ \frac{\partial \Delta \overline{\mathbf{v}}_{i j}}{\partial \mathbf{b}^{a}} &=-\sum_{k=i}^{j-1} \Delta \overline{\mathrm{R}}_{i k} \Delta t 
+\\
+\frac{\partial \Delta \overline{\mathbf{v}}_{i j}}{\partial \mathbf{b}^{g}}&=-\sum_{k=i}^{j-1} \Delta \overline{\mathrm{R}}_{i k}\left(\tilde{\mathbf{a}}_{k}-\overline{\mathbf{b}}_{i}^{a}\right)^{\wedge} \frac{\partial \Delta \overline{\mathbf{R}}_{i k}}{\partial \mathbf{b}^{g}} \Delta t
+\\\frac{\partial \Delta \overline{\mathbf{p}}_{i j}}{\partial \mathbf{b}^{a}}&=\sum_{k=i}^{j-1} \frac{\partial \Delta \overline{\mathbf{v}}_{i k}}{\partial \mathbf{b}^{a}} \Delta t-\frac{1}{2} \Delta \overline{\mathrm{R}}_{i k} \Delta t^{2}
+\\\frac{\partial \Delta \overline{\mathbf{p}}_{i j}}{\partial \mathbf{b}^{g}}&=\sum_{k=i}^{j-1} \frac{\partial \Delta \overline{\mathbf{v}}_{i k}}{\partial \mathbf{b}^{g}} \Delta t-\frac{1}{2} \Delta \overline{\mathrm{R}}_{i k}\left(\tilde{\mathbf{a}}_{k}-\overline{\mathbf{b}}_{i}^{a}\right)^{\wedge} \frac{\partial \Delta \overline{\mathrm{R}}_{i k}}{\partial \mathbf{b}^{g}} \Delta t^{2}
+\end{align}
+$$
+
+##### 残差的雅克比
+
+为了要计算雅克比,我们将使用以下公式"Lifting"cost function,
+$$
+\begin{array}{llll}{\mathrm{R}_{i}}  {\leftarrow}  {\mathrm{R}_{i} \operatorname{Exp}\left(\delta \phi_{i}\right),}  {\mathrm{R}_{j}}  {\leftarrow}  {\mathrm{R}_{j} \operatorname{Exp}\left(\delta \phi_{j}\right)} \\ {\mathbf{p}_{i}}  {\leftarrow}  {\mathbf{p}_{i}+\mathrm{R}_{i} \delta \mathbf{p}_{i},}  {\mathbf{p}_{j}}  {\leftarrow}  {\mathbf{p}_{j}+\mathrm{R}_{j} \delta \mathbf{p}_{j}} \\ {\mathbf{v}_{i}} {\leftarrow}  {\mathbf{v}_{i}+\delta \mathbf{v}_{i},}  {\mathbf{v}_{j}}  {\leftarrow}  {\mathbf{v}_{j}+\delta \mathbf{v}_{i}} \\ {\delta \mathbf{b}_{i}^{g}}  {\leftarrow \delta \mathbf{b}_{i}^{g}+\tilde{\delta} \mathbf{b}_{i}^{g},}  {\delta \mathbf{b}_{i}^{a}}  {\leftarrow}  {\delta \mathbf{b}_{i}^{a}+\delta \mathbf{b}_{i}^{a}}\end{array}
+$$
+
+1. 计算$\mathbf{r}_{\Delta \mathbf{p}_{i j}}​$的雅克比
+
+因为$\mathbf{r}_{\Delta \mathbf{p}_{i j}}$和$\delta \mathbf{b}_{i}^{g}$,$\delta \mathbf{b}_{i}^{a}$线性相关,所以$\mathbf{r}_{\Delta \mathbf{p}_{i j}}$对$\delta \mathbf{b}_{i}^{g}$,$\delta \mathbf{b}_{i}^{a}$的雅克比就是$\delta \mathbf{b}_{i}^{g}$,$\delta \mathbf{b}_{i}^{a}$的系数,并且$\mathbf{r}_{\Delta \mathbf{p}_{i j}}$中并没有$\mathrm{R}_{j}$ 和 $\mathbf{v}_{j}​$所以这两个的雅克比为0,接下来我们要计算剩下的雅克比,
+
+$$
+\begin{array} \mathbf{r}_{\Delta \mathbf{p}_{i j}}\left(\mathbf{p}_{i}+\mathrm{R}_{i} \delta \mathbf{p}_{i}\right) &=\mathrm{R}_{i}^{\top}\left(\mathbf{p}_{j}-\mathbf{p}_{i}-\mathrm{R}_{i} \delta \mathbf{p}_{i}-\mathbf{v}_{i} \Delta t_{i j}-\frac{1}{2} \mathbf{g} \Delta t_{i j}^{2}\right)-C \\ &=\mathbf{r}_{\Delta \mathbf{p}_{i j}}\left(\mathbf{p}_{i}\right)+\left(-\mathbf{I}_{3 \times 1}\right) \delta \mathbf{p}_{i} \end{array}
+$$
+
+$$
+\begin{array} \mathbf{r}_{\Delta \mathbf{p}_{i j}}\left(\mathbf{p}_{j}+\mathbf{R}_{j} \delta \mathbf{p}_{j}\right) &=\mathbf{R}_{i}^{\top}\left(\mathbf{p}_{j}+\mathbf{R}_{j} \delta \mathbf{p}_{j}-\mathbf{p}_{i}-\mathbf{v}_{i} \Delta t_{i j}-\frac{1}{2} \mathbf{g} \Delta t_{i j}^{2}\right)-C \\ &=\mathbf{r}_{\Delta \mathbf{p}_{i j}}\left(\mathbf{p}_{j}\right)+\left(\mathrm{R}_{i}^{\top} \mathrm{R}_{j}\right) \delta \mathbf{p}_{j} \end{array}
+$$
+
+$$
+\begin{array} \mathbf{r}_{\Delta \mathbf{p}_{i j}}\left(\mathbf{v}_{i}+\delta \mathbf{v}_{i}\right) &=\mathrm{R}_{i}^{\top}\left(\mathbf{p}_{j}-\mathbf{p}_{i}-\mathbf{v}_{i} \Delta t_{i j}-\delta \mathbf{v}_{i} \Delta t_{i j}-\frac{1}{2} \mathbf{g} \Delta t_{i j}^{2}\right)-C \\ &=\mathbf{r}_{\Delta \mathbf{p}_{i j}}\left(\mathbf{v}_{i}\right)+\left(-\mathbf{R}_{i}^{\top} \Delta t_{i j}\right) \delta \mathbf{v}_{i} \end{array}
+$$
+
+$$
+\begin{array} \mathbf{r}_{\Delta \mathbf{p}_{i j}}\left(\mathrm{R}_{i} \operatorname{Exp}\left(\delta \phi_{i}\right)\right) &=\left(\mathrm{R}_{i} \operatorname{Exp}\left(\delta \phi_{i}\right)\right)^{\top}\left(\mathbf{p}_{j}-\mathbf{p}_{i}-\mathbf{v}_{i} \Delta t_{i j}-\frac{1}{2} \mathbf{g} \Delta t_{i j}^{2}\right)-C 
+\\
+&\stackrel{\mathbb{}}{=}\left(\mathbf{I}-\delta \phi_{i}^{\wedge}\right) \mathrm{R}_{i}^{\top}\left(\mathbf{p}_{j}-\mathbf{p}_{i}-\mathbf{v}_{i} \Delta t_{i j}-\frac{1}{2} \mathbf{g} \Delta t_{i j}^{2}\right)-C
+\\
+&\stackrel{\mathbb{}}{=} \mathbf{r}_{\Delta \mathbf{p}_{i j}}\left(\mathrm{R}_{i}\right)+\left(\mathrm{R}_{i}^{\top}\left(\mathbf{p}_{j}-\mathbf{p}_{i}-\mathbf{v}_{i} \Delta t_{i j}-\frac{1}{2} \mathbf{g} \Delta t_{i j}^{2}\right)\right)^{\wedge} \delta \boldsymbol{\phi}_{i}
+\end{array}
+$$
+
+在上面的公式中,$C \doteq \Delta \tilde{\mathbf{p}}_{i j}+\frac{\partial \Delta \overline{\mathbf{p}}_{i j}}{\partial \mathbf{b}_{i}^{g}} \delta \mathbf{b}_{i}^{g}+\frac{\partial \Delta \overline{\mathbf{p}}_{i j}}{\partial \mathbf{b}_{i}^{a}} \delta \mathbf{b}_{i}^{a}​$.
+
+所以$\mathbf{r}_{\Delta \mathbf{p}_{i j}}$的雅克比为,
+$$
+\begin{array}
+&\frac{\partial \mathbf{r}_{\Delta \mathbf{p}_{i j}}}{\partial \delta \phi_{i}}=\left(\mathbf{R}_{i}^{\top}\left(\mathbf{p}_{j}-\mathbf{p}_{i}-\mathbf{v}_{i} \Delta t_{i j}-\frac{1}{2} \mathbf{g} \Delta t_{i j}^{2}\right)\right)^{\wedge} &
+\frac{\partial \mathbf{r}_{\Delta \mathbf{p}_{i j}}}{\partial \delta \phi_{j}}=\mathbf{0}
+\\\frac{\partial \mathbf{r} \Delta \mathbf{p}_{i j}}{\partial \delta \mathbf{p}_{i}}=-\mathbf{I}_{3 \times 1} \quad &\frac{\partial \mathbf{r}_{\Delta \mathbf{p}_{i j}}}{\partial \delta \mathbf{p}_{j}}=\mathrm{R}_{i}^{\top} \mathrm{R}_{j}
+\\\frac{\partial \mathbf{r}_{\Delta \mathbf{p}_{i j}}}{\partial \delta \mathbf{v}_{i}}=-\mathbf{R}_{i}^{\top} \Delta t_{i j} \quad \quad \quad &\frac{\partial \mathbf{r}_{\Delta \mathbf{p}_{i j}}}{\partial \delta \mathbf{v}_{j}}=\mathbf{0}
+\\\frac{\partial \mathbf{r}_{\Delta \mathbf{p}_{i j}}}{\partial \tilde{\delta} \mathbf{b}_{i}^{a}}=-\frac{\partial \Delta \overline{\mathbf{p}}_{i j}}{\partial \mathbf{b}_{i}^{a}} \quad &\frac{\partial \mathbf{r}_{\Delta \mathbf{p}_{i j}}}{\partial \tilde{\delta} \mathbf{b}_{i}^{g}}=-\frac{\partial \Delta \overline{\mathbf{p}}_{i j}}{\partial \mathbf{b}_{i}^{g}}
+\end{array}
+$$
+
+2. 计算$\mathbf{r}_{\Delta \mathbf{v}_{i j}}​$的雅克比
+
+和$\mathbf{r}_{\Delta \mathbf{p}_{i j}}​$一样,$\mathbf{r}_{\Delta \mathbf{v}_{i j}}​$和$\delta \mathbf{b}_{i}^{g}​$,$\delta \mathbf{b}_{i}^{a}​$线性相关,对$\delta \mathbf{b}_{i}^{g}​$,$\delta \mathbf{b}_{i}^{a}​$的雅克比就是$\delta \mathbf{b}_{i}^{g}​$,$\delta \mathbf{b}_{i}^{a}​$的系数,并且并且$\mathbf{r}_{\Delta \mathbf{v}_{i j}}​$中并没有$\mathrm{R}_{j}​$ 和 $\mathbf{p}_{i}​$,$\mathbf{p}_{j}​$所以这三个的雅克比为0,接下来我们要计算剩下的雅克比,
+$$
+\begin{array} \mathbf{r}_{\Delta \mathbf{v}_{i j}}\left(\mathbf{v}_{i}+\delta \mathbf{v}_{i}\right) &=\mathbf{R}_{i}^{\top}\left(\mathbf{v}_{j}-\mathbf{v}_{i}-\delta \mathbf{v}_{i}-\mathbf{g} \Delta t_{i j}\right)-D \\ &=\mathbf{r}_{\Delta \mathbf{v}}\left(\mathbf{v}_{i}\right)-\mathbf{R}_{i}^{\top} \delta \mathbf{v}_{i} \\ \mathbf{r}_{\Delta \mathbf{v}_{i j}}\left(\mathbf{v}_{j}+\delta \mathbf{v}_{j}\right) &=\mathbf{R}_{i}^{\top}\left(\mathbf{v}_{j}+\delta \mathbf{v}_{j}-\mathbf{v}_{i}-\mathbf{g} \Delta t_{i j}\right)-D \\ &=\mathbf{r}_{\Delta \mathbf{v}}\left(\mathbf{v}_{j}\right)+\mathrm{R}_{i}^{\top} \delta \mathbf{v}_{j} 
+
+\\\mathbf{r}_{\Delta \mathbf{v}_{i j}}\left(\mathrm{R}_{i} \operatorname{Exp}\left(\delta \phi_{i}\right)\right)&=\left(\mathrm{R}_{i} \operatorname{Exp}\left(\delta \phi_{i}\right)\right)^{\top}\left(\mathbf{v}_{j}-\mathbf{v}_{i}-\mathbf{g} \Delta t_{i j}\right)-D
+\\&=\left(\mathbf{I}-\delta \boldsymbol{\phi}_{i}^{\wedge}\right) \mathrm{R}_{i}^{\top}\left(\mathbf{v}_{j}-\mathbf{v}_{i}-\mathbf{g} \Delta t_{i j}\right)-D
+\\&\stackrel{\mathbb{} }{=} \mathbf{r}_{\Delta \mathbf{v}}\left(\mathrm{R}_{i}\right)+\left(\mathrm{R}_{i}^{\top}\left(\mathbf{v}_{j}-\mathbf{v}_{i}-\mathbf{g} \Delta t_{i j}\right)\right)^{\wedge} \delta \boldsymbol{\phi}_{i}
+\end{array}
+$$
+其中$D \doteq\left[\Delta \tilde{\mathbf{v}}_{i j}+\frac{\partial \Delta \overline{\mathbf{v}}_{i j}}{\partial \mathbf{b}_{i}^{g}} \delta \mathbf{b}_{i}^{g}+\frac{\partial \Delta \overline{\mathbf{v}}_{i j}}{\partial \mathbf{b}_{i}^{a}} \delta \mathbf{b}_{i}^{a}\right]$,所以总体的雅克比为,
+
+
+$$
+\begin{array}
+&\frac{\partial \mathbf{r}_{\Delta \mathbf{v}_{i j}}}{\partial \delta \phi_{i}}=\left(\mathrm{R}_{i}^{\top}\left(\mathbf{v}_{j}-\mathbf{v}_{i}-\mathbf{g} \Delta t_{i j}\right)\right)^{\wedge} &\frac{\partial \mathbf{r}_{\Delta \mathbf{v}_{i j}}}{\partial \delta \phi_{j}}=\mathbf{0}
+\\\frac{\partial \mathbf{r}_{\Delta \mathbf{v}_{i j}}}{\partial \delta \mathbf{p}_{i}}=\mathbf{0} \quad &\frac{\partial \mathbf{r}_{\Delta \mathbf{v}_{i j}}}{\partial \delta \mathbf{p}_{j}}=\mathbf{0}
+\\\frac{\partial \mathbf{r}_{\Delta \mathbf{v}_{i j}}}{\partial \delta \mathbf{v}_{i}}=-\mathrm{R}_{i}^{\top} \quad &\frac{\partial \mathbf{r}_{\Delta \mathbf{v}_{i j}}}{\partial \delta \mathbf{v}_{j}}=\mathrm{R}_{i}^{\top}
+\\\frac{\partial \mathbf{r} \Delta \mathbf{v}_{i j}}{\partial \tilde{\delta} \mathbf{b}_{i}^{a}}=-\frac{\partial \Delta \overline{\mathbf{v}}_{i j}}{\partial \mathbf{b}_{i}^{a}} \quad &\frac{\partial \mathbf{r} \Delta \mathbf{v}_{i j}}{\partial \tilde{\delta} \mathbf{b}_{i}^{g}}=-\frac{\partial \Delta \overline{\mathbf{v}}_{i j}}{\partial \mathbf{b}_{i}^{g}}
+\end{array}
+$$
+
+3. 计算$\mathbf{r}_{\Delta \mathbf{R}_{i j}}$的雅克比
+
+具体分析和上面一样,
+
+![](/home/liu/Documents/some_notes/VIO公式推导/r_rij导数.png)
+
+在上面的公式中,$E \doteq \operatorname{Exp}\left(\frac{\partial \Delta \overline{\mathrm{R}}_{i j}}{\partial \mathrm{b}^{g}} \delta \mathbf{b}^{g}\right)$,$\mathrm{J}_{r}^{b} \doteq \mathrm{J}_{r}\left(\frac{\partial \Delta \overline{\mathrm{R}}_{i j}}{\partial \mathrm{b}^{g}} \delta \mathrm{b}_{i}^{g}\right)​$
+
+![](/home/liu/Documents/some_notes/VIO公式推导/r_rij公式合集.png)
+
