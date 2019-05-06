@@ -254,13 +254,29 @@ $\rho_{l} \in \mathbb{R}^{3}$是地图点的位置,如果直接对所有的地�
 $$
 \sum_{l=1}^{L} \sum_{i \in \mathcal{X}(l)}\left\|\mathbf{z}_{i l}-\check{\pi}\left(\delta \boldsymbol{\phi}_{i}, \delta \mathbf{p}_{i}, \delta \rho_{l}\right)\right\|_{\mathbf{\Sigma}_{c}}^{2}
 $$
+上面的公式$\check{\pi}(\cdot)$用了一次李代数上的扰动模型,
+$$
+\mathcal{R}_{\mathrm{T}}(\delta \phi, \delta \mathbf{p})=(\mathrm{R} \operatorname{Exp}(\delta \phi), \mathbf{p}+\mathrm{R} \delta \mathbf{p}), \quad[\delta \phi \ \delta \mathbf{p}] \in \mathbb{R}^{6}
+$$
+求解公式77的常用方法就是作线性展开,得到
+$$
+\sum_{l=1}^{L} \sum_{i \in \mathcal{X}(l)}\left\|\mathbf{F}_{i l} \delta \mathbf{T}_{i}+\mathbf{E}_{i l} \delta \rho_{l}-\mathbf{b}_{i l}\right\|^{2}
+$$
+其中,$\delta \mathbf{T}_{i} \doteq\left[\delta \phi_{i} \delta \mathbf{p}_{i}\right]^{\top}$,$\mathbf{b}_{i l}$是在线性点的残余误差.然后我们将第二个和合并,
+$$
+\sum_{l=1}^{L}\left\|\mathbf{F}_{l} \delta \mathbf{T}_{\mathcal{X}(l)}+\mathbf{E}_{l} \delta \rho_{l}-\mathbf{b}_{l}\right\|^{2}
+$$
+最小化公式80,我们得到,
+$$
+\delta \rho_{l}=-\left(\mathbf{E}_{l}^{\top} \mathbf{E}_{l}\right)^{-1} \mathbf{E}_{l}^{\top}\left(\mathbf{F}_{l} \delta \mathbf{T}_{\mathcal{X}(l)}-\mathbf{b}_{l}\right)
+$$
+将公式81代入公式80,得到,
+$$
+\sum_{l=1}^{L}\left\|\left(\mathbf{I}-\mathbf{E}_{l}\left(\mathbf{E}_{l}^{\top} \mathbf{E}_{l}\right)^{-1} \mathbf{E}_{l}^{\top}\right)\left(\mathbf{F}_{l} \delta \mathbf{T}_{\mathcal{X}(l)}-\mathbf{b}_{l}\right)\right\|^{2}
+$$
+$\mathbf{I}-\mathbf{E}_{l}\left(\mathbf{E}_{l}^{\top} \mathbf{E}_{l}\right)^{-1} \mathbf{E}_{l}^{\top}$是$\mathbf{E}_{l}$的正交映射.
 
-
-
-
-
-
-
+这样我们就可以看到在最后的优化问题上我们只考虑了pose信息.
 
 ### 附录
 
