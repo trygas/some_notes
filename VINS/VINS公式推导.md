@@ -31,6 +31,8 @@ $\left(^{\wedge}\right)$:表示某一具体量的噪声测量值或估计值
 
 ### 预处理
 
+#### 连续时间
+
 IMU的原始陀螺仪和加速度计$\hat{w}$和$\hat{a}$测量结果:
 $$
 \begin{align} \hat{\mathbf{a}}_{t} &=\mathbf{a}_{t}+\mathbf{b}_{a_{t}}+\mathbf{R}_{w}^{t} \mathbf{g}^{w}+\mathbf{n}_{a} \\ \hat{\omega}_{t} &=\omega_{t}+\mathbf{b}_{w_{t}}+\mathbf{n}_{w} \end{align}
@@ -81,7 +83,15 @@ $$
 
 可以看到预积分项（11,12,13）可以通过将$b_{k}$视为参考帧的IMU测量值单独得到.公式只与$b_{k},b_{k+1}$中的IMU偏置相关,与其他状态无关.
 
-然后当我们需要进行优化的时候,因为已经转化到IMU坐标系下,每次都只需传入IMU偏置测量值,而不需要乘以$b_{k}$的旋转.并且当偏置估计发生变化时,若偏置变化很小,则我们将$\alpha_{b_{k+1}}^{b k}, \beta_{b_{k+1}}^{b k}, \gamma_{b_{k+1}}^{b k}$按其对偏置的一阶近似来调整,否则就重新传递.
+**然后当我们需要进行优化的时候,因为已经转化到IMU坐标系下,每次都只需传入IMU偏置测量值,而不需要乘以$b_{k}$的旋转.**并且当偏置估计发生变化时,若偏置变化很小,则我们将$\alpha_{b_{k+1}}^{b k}, \beta_{b_{k+1}}^{b k}, \gamma_{b_{k+1}}^{b k}$按其对偏置的一阶近似来调整,否则就重新传递.
+
+#### 离散时间
+
+**在开始的时候,$\alpha_{b_k}^{b_{k}} , \beta_{b_{k}}^{b_{k}}$是0,$\gamma_{b_{k}}^{b_{k}}$是单位四元数.**$\alpha, \beta, \gamma$在公式(11,12,13)中的平均值是如下传递的.注意增加的噪声项$n_a,n_w$是未知的,在实现中被视为0.这样就得到了预积分的估计值,标记为$(\hat{\cdot})$
+$$
+\begin{align}&{\hat{\boldsymbol{\alpha}}_{i+1}^{b_{k}}=\hat{\boldsymbol{\alpha}}_{i}^{b_{k}}+\hat{\boldsymbol{\beta}}_{i}^{b_{k}} \delta t+\frac{1}{2} \mathbf{R}\left(\hat{\gamma}_{i}^{b_{k}}\right)\left(\hat{\mathbf{a}}_{i}-\mathbf{b}_{a_{i}}\right) \delta t^{2}} \\ &{\hat{\boldsymbol{\beta}}_{i+1}^{b_{k}}=\hat{\boldsymbol{\beta}}_{i}^{b_{k}}+\mathbf{R}\left(\hat{\gamma}_{i}^{b_{k}}\right)\left(\hat{\mathbf{a}}_{i}-\mathbf{b}_{a_{i}}\right) \delta t} \\ &{\hat{\gamma}_{i+1}^{b_{k}}=\hat{\gamma}_{i}^{b_{k}} \otimes\left[\begin{array}{cc}{1} \\ {\frac{1}{2}\left(\hat{\boldsymbol{\omega}}_{i}-\mathbf{b}_{w_{i}}\right) \delta t}\end{array}\right]}\end{align}
+$$
+
 
 
 
