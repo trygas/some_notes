@@ -128,7 +128,7 @@ $$
 
 优化变量的数学形式为
 $$
-X_{k}(16+7 N) \times 1=[X_{IMU_k}\  {^{C_1}_G\overline{q}} \ {^Gp_{C_1}} \ ... \ {^{C_N}_G\overline{q}} \ {^Gp_{C_N}}]
+X_{k}^{(16+7 N)} \times 1=[X_{IMU_k}\  {^{C_1}_G\overline{q}} \ {^Gp_{C_1}} \ ... \ {^{C_N}_G\overline{q}} \ {^Gp_{C_N}}]
 $$
 其中,$^{C_{1}}_G \overline{q}=\overline{q}_{C_{1} \leftarrow G}$为归一化四元数,$^{G} p_{C_{1}}=p_{G \leftarrow C_{1}}$注意旋转和平移的坐标系方向相反,第k帧的优化变量$X_{IMU_{k}}$为,
 $$
@@ -144,4 +144,52 @@ $$
 MSCKF在预测和更新时的处理对象为误差状态向量,并非上面的实际状态向量,理由有以下四个:
 
 - 朝向用四元数表示是过参的,但是角度误差的参数只有3个,与自由度是一致的.
-- 
+- 误差的均值为0,更接近初值,线性化点较为准确.
+- 误差的值很小,可忽略二阶.
+- 误差的运动很慢.
+
+那么,对应的误差状态向量为
+$$
+\tilde{X}_{k}^{(15+6 N)} \times 1=[\tilde{X}_{IMU_k}\  {{\delta\theta}_{C_1}} \ {^G\tilde{p}_{C_1}} \ ... \ {\delta\theta}_{C_N} \ {^G\tilde{p}_{C_N}}]
+$$
+其中,$\delta \theta_{C_{1}}=\delta \theta_{C_{1} \leftarrow G}$,$^{G} \tilde{p}_{C_{1}}=\tilde{p}_{G \leftarrow C_{1}}$,第k帧的误差状态向量$\tilde{X}_{IMU_k}$为
+$$
+X_{I M U_{k}}^{15 \times 1}=\left[\begin{array}{lll}{\delta{\theta}_I} & {\tilde{b}_{g}} & {^{G} \tilde{v}_{I}} & {\tilde{b}_{a}} & {^G\tilde{p}_{I}}\end{array}\right]^{T}
+$$
+其中,$\delta \theta_{I}=\delta \theta_{I \leftarrow G}$表示从世界系到IMU局部系的旋转角度.
+
+#### 离散状态下的误差状态的运动方程
+
+在连续形式下,误差状态的运动方程为
+$$
+\dot{\tilde{X}}_{I M U}^{15 \times 1}=F^{15 \times 15} \tilde{X}_{I M U}^{15 \times 1}+G^{15 \times 12} n_{I M U}^{12 \times 1}
+$$
+那么离散状态下的误差导数公式为
+$$
+\tilde{X}_{I M U_{k+1}}=\Phi\left(t_{k}+\Delta T, t_{k}\right) \tilde{X}_{I M U_{k}}+(G \Delta T) n_{I M U}
+$$
+其中,$\Delta T$为第k个IMU时刻到第k+1个IMU时刻的间隔,$\Phi$为第k时刻的IMU误差项到第k+1时刻的变换关系,有些文献将$\Phi$写成指数形式,还有写文献携程近似形式:
+$$
+\Phi\left(t_{k}+\Delta T, t_{k}\right)=\exp (F \Delta T) \cong \mathrm{I}_{15 \times 15}+F \Delta T
+$$
+但mskckf与上面不同.
+
+#### 连续形式下的协方差传播
+
+假如第k时刻的整体的协方差矩阵如下:
+$$
+P_{k | k}^{(15+6 N) \times(15+6 N)}=\left[\begin{array}{cc}{P_{I I_{k | k}}} & {P_{I C_{k | k}}} \\ {P_{I C_{k | k}}^{T}} & {P_{C C_{k | k}}}\end{array}\right]
+$$
+其中,$P_{k | k}^{(15+6 N) \times(15+6 N)}$是当前帧的PVQB与自身的协方差矩阵;$P_{I C_{k | k}} 15 \times 6 N$为当前帧的PVQB与滑窗内其他帧位姿的协方差矩阵;$P_{C C_{k | k}} 6 N \times 6 N$为滑窗内所有相机的位姿与自身的协方差矩阵.
+
+下图给出了整体IDE误差状态向量,以及整体的协方差矩阵.
+
+![](/home/liu/Documents/some_notes/msckf/第k时刻的整体误差状态向量和整体协方差矩阵.png)
+
+当下一个IMU,即第k+1个IMU来到后,此时k+1时刻的整体协方差矩阵可写为:
+$$
+P_{k+1 | k}^{(15+6 N) \times(15+6 N)}=\left[\begin{array}{cc}{P_{I I_{k+1 | k}}} & {\Phi\left(t_{k}+\Delta T, t_{k}\right) P_{I C_{k | k}}} \\ {P_{I C_{k | k}}^{T} \Phi\left(t_{k}+\Delta T, t_{k}\right)^{T}} & {P_{C C_{k | k}}}\end{array}\right]
+$$
+第k+1时刻的整体协方差矩阵可用下图表示:
+![](/home/liu/Documents/some_notes/msckf/k+1时刻协方差矩阵.png)
+
