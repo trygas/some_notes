@@ -91,9 +91,13 @@ $$
 $$
 \begin{align}&{\hat{\boldsymbol{\alpha}}_{i+1}^{b_{k}}=\hat{\boldsymbol{\alpha}}_{i}^{b_{k}}+\hat{\boldsymbol{\beta}}_{i}^{b_{k}} \delta t+\frac{1}{2} \mathbf{R}\left(\hat{\gamma}_{i}^{b_{k}}\right)\left(\hat{\mathbf{a}}_{i}-\mathbf{b}_{a_{i}}\right) \delta t^{2}} \\ &{\hat{\boldsymbol{\beta}}_{i+1}^{b_{k}}=\hat{\boldsymbol{\beta}}_{i}^{b_{k}}+\mathbf{R}\left(\hat{\gamma}_{i}^{b_{k}}\right)\left(\hat{\mathbf{a}}_{i}-\mathbf{b}_{a_{i}}\right) \delta t} \\ &{\hat{\gamma}_{i+1}^{b_{k}}=\hat{\gamma}_{i}^{b_{k}} \otimes\left[\begin{array}{cc}{1} \\ {\frac{1}{2}\left(\hat{\boldsymbol{\omega}}_{i}-\mathbf{b}_{w_{i}}\right) \delta t}\end{array}\right]}\end{align}
 $$
+i是在$[t_k,t_{k+1}]$中IMU测量值对应的离散时刻,$\delta t$是IMU测量值i和i+1之间的时间间隔.
 
-
-
+然后讨论协方差传递问题,我们将四维旋转四元数误差项定义为围绕其平均值的扰动:
+$$
+\gamma_{t}^{b_{k}} \approx \hat{\gamma}_{t}^{b_{k}} \otimes\left[\begin{array}{c}{1} \\ {\frac{1}{2} \delta \boldsymbol{\theta}_{t}^{b_{k}}}\end{array}\right]
+$$
+其中$\delta \theta^{b_k}_t$是三维小扰动.
 
 
 
