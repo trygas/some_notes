@@ -1,3 +1,5 @@
+[TOC]
+
 # MSCKF(双目)
 
 ### 视觉前端
@@ -193,3 +195,87 @@ $$
 第k+1时刻的整体协方差矩阵可用下图表示:
 ![](/home/liu/Documents/some_notes/msckf/k+1时刻协方差矩阵.png)
 
+计算$P_{I I_{k+1 | k}}$:
+$$
+P_{I I_{k+1 | k}}=\Phi P_{I I_{k | k}} \Phi^{T}+G Q_{I M U} G^{T} \Delta T
+$$
+第k+1时刻的IMU和Camera位姿的协方差计算公式为:
+$$
+P_{I C_{k+1 | k}}=\Phi\left(t_{k}+\Delta T, t_{k}\right) P_{I C_{k | k}}
+$$
+上面的公式可以理解为:
+$$
+\mathrm{P}\left(I_{k+1} | C_{k}\right)=P\left(I_{k+1} | I_{k}\right) \mathrm{P}\left(I_{k} | C_{k}\right)
+$$
+
+#### 相机位姿状态增广
+
+当我们获得一张新的相机图像时,假设为N+1帧图像,则需要将位姿的误差加入到当前优化状态向量中,首先我们给出第N+1帧图像的位姿.
+
+无误差和噪声的相机位姿可以写成如下形式:
+$$
+\widehat{T}_{C_{N+1} \leftarrow G}^{7 \times 1}=\left[\begin{array}{c}{^{C_{N+1}}_G \hat{\overline{q}}} \\ {^G{\hat{p}_{C_{N+1}}}}\end{array}\right]=\left[\begin{array} c{^{C}_{I} \hat{\overline{q}}} \otimes {_G^{I_{N+1}} \hat{q}}  \\ ^{G} \hat{p}_{I_{N+1}}+^{I_{N+1}}_G \widehat{\overline{q}}^{T} {^I{p_{C}}}\end{array}\right]
+$$
+ 然后我们想要获取带误差和噪声的真实相机位姿,则要在上面的公式基础上加上error,可得:
+$$
+T_{C_{N+1} \leftarrow G}^{7 \times 1}=\delta T_{C_{N+1} \leftarrow G} \oplus \hat{T}_{C_{N+1} \leftarrow G} = \left[\begin{array}{c}{\exp \left(\delta \theta_{C_{N+1} \leftarrow G}^{\wedge}\right)_{G}^{C_{N+1}} \widehat{\overline{q}}} \\ ^G{\hat{p}_{C_{N+1}}+^{G} \tilde{p}_{C_{N+1}}}\end{array}\right]
+$$
+将无误差噪声相机位姿的公式代入可得:
+$$
+T_{C_{N+1} \leftarrow G}^{7 \times 1}=\left[\begin{array}c{^C_I \overline{q}}\otimes exp{(\delta \theta_{I_{N+1} \leftarrow G}^{\wedge}})\ ^{I_{N+1}}_G \hat{\overline{q}} \\
+\left(^{G} \hat{p}_{I_{N+1}}+^{G} \tilde{p}_{I_{N+1}}\right)+\left[\exp \left(\delta \theta_{I_{N+1}\leftarrow G}^{\wedge}\right)_{G}^{I_{N+1}} \hat{\overline{q}}\right]^{T} {^{I} p_{\mathcal{C}}}
+\end{array}\right]
+$$
+因为MSCKF中讨论的状态向量为状态向量的误差,因此**增广的误差状态向量为当前帧即第N+1帧的位姿误差**.(**我们用来计算的是当前帧的PVBQ误差和滑窗内其他老帧的位姿误差**)那么,需要增广的位姿误差可写为:
+$$
+\delta T_{C_{N+1} \leftarrow G}=\left[\begin{array}{c}{\delta \theta_{C_{N+1} \leftarrow G}} \\ {^G \tilde{p}_{C_{N+1}}}\end{array}\right]
+$$
+
+
+
+
+
+
+
+
+
+
+### 附录
+
+#### 龙格库塔方法
+
+对于**一阶精度**的欧拉公式有:
+$$
+y_{i+1}=y_{i}+h k_{i}
+$$
+其中,$h$为步长,则$y_{i+1}$的表达式与$y(x_{i+1})$的Taylor展开式的前两项完全相同,则局部截断误差为$O\left(h^{2}\right)$.
+
+如果我们想获得**二阶精度**的改进欧拉公式,则我们需要用点$x_i$处的斜率近似值$k_1$与右端点$x_{i+1}$处的斜率$k_2$的算术平均值作为平均斜率$k^*$的近似值,公式如下:
+$$
+y_{i+1}=y_{i}+h\left(k_{1}+k_{2}\right)
+$$
+其中,$k_1=f(x_i,y_i), k_2=f(x_i+h,y_i+hk_1)$
+
+于是我们能够考虑用函数$f(x,y)$在若干点上的函数值的线性组合构造近似公式.我们要求构造的近似公式在$f_(x_i, y_i)$处的Taylor展开式与解$y(x)$在$x_i$处的Taylor展开式前面几项重合,从而使近似公式达到所需要的阶数.这样既避免求高阶导数,又提高了计算方法精度的阶数.或者说,在$[x_i,x_{i+1}]$这一步内计算多个点的斜率值,若将其进行加权平均作为平均斜率,则可以构造处更高精度的计算公式,这就是龙格库塔方法.
+
+下面介绍**四阶龙格库塔**方法:
+
+设
+$$
+y_{i+1}=y_{i}+c_{1} K_{1}+c_{2} K_{2}+c_{3} K_{3}+c_{4} K_{4}
+$$
+这里的$K_1,K_2,K_3,K_4$是四个不同点上的函数值,分别设其为:
+$$
+\begin{array}{l}{K_{1}=h f\left(x_{i}, y_{i}\right)} \\ {K_{2}=h f\left(x_{i}+a_{2} h, y_{i}+b_{21} K_{1}\right)} \\ {K_{3}=h f\left(x_{i}+a_{3} h, y_{i}+b_{31} K_{1}+b_{32} K_{2}\right)} \\ {K_{4}=h f\left(x_{i}+a_{4} h, y_{i}+b_{41} K_{1}+b_{42} K_{2}+b_{43} K_{3}\right)}\end{array}
+$$
+其中$c_i,a_i,b_{ij}$均为待定系数.
+
+经过一系列的求解过程就能得到系数的一组特解:
+$$
+\begin{array}{c}{a_{2}=a_{3}=b_{21}=b_{32}=\frac{1}{2}} \\ {b_{31}=b_{41}=b_{42}=0} \\ {a_{4}=b_{43}=1} \\ {c_{1}=c_{4}=\frac{1}{6}} \\ {c_{2}=c_{3}=\frac{1}{3}}\end{array}
+$$
+代入之后得到:
+$$
+\begin{array}{l}{y_{i+1}=y_{i}+\frac{1}{6}\left(K_{1}+2 K_{2}+2 K_{3}+K_{4}\right)} \\ {K_{1}=h f\left(x_{i}, y_{i}\right)} \\ {K_{2}=h f\left(x_{i}+\frac{h}{2}, y_{i}+\frac{1}{2} K_{1}\right)} \\ {K_{3}=h f\left(x_{i}+\frac{h}{2}, y_{i}+\frac{1}{2} K_{2}\right)} \\ {K_{4}=h f\left(x_{i}+h, y_{i}+K_{3}\right)}\end{array}
+$$
+龙格库塔方法的推导基于Taylor展开方法,因此它要求所求的解具有较好的光滑性.如果解的光滑性差,那么使用四阶龙格库塔方法求解的数值解,其精度可能反而不如改进的欧拉方法.所以对于光滑性不太好的解,最好采用低阶算法并且将步长$h$取小.
