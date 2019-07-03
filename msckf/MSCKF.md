@@ -208,7 +208,7 @@ $$
 \mathrm{P}\left(I_{k+1} | C_{k}\right)=P\left(I_{k+1} | I_{k}\right) \mathrm{P}\left(I_{k} | C_{k}\right)
 $$
 
-#### 相机位姿状态增广
+#### 误差状态向量增广
 
 当我们获得一张新的相机图像时,假设为N+1帧图像,则需要将位姿的误差加入到当前优化状态向量中,首先我们给出第N+1帧图像的位姿.
 
@@ -230,6 +230,39 @@ $$
 $$
 \delta T_{C_{N+1} \leftarrow G}=\left[\begin{array}{c}{\delta \theta_{C_{N+1} \leftarrow G}} \\ {^G \tilde{p}_{C_{N+1}}}\end{array}\right]
 $$
+
+那么,根据上面公式,我们可以推导出第N+1帧相机位姿的误差状态向量和原来的整体误差状态向量的关系,即将公式中的每一行单独写开为:
+$$
+{\exp \left(\delta \theta_{C_{N+1} \leftarrow G}^{\wedge}\right)_{G}^{C_{N+1}} \widehat{\overline{q}}} ={^C_I \overline{q}}\otimes exp{(\delta \theta_{I_{N+1} \leftarrow G}^{\wedge}})\ ^{I_{N+1}}_G \hat{\overline{q}} \Leftrightarrow \delta \theta_{C_{N+1} \leftarrow G}=_{I}^{C} \overline{q} \delta \theta_{I_{N+1} \leftarrow G}
+$$
+
+$$
+^G{\hat{p}_{C_{N+1}}+^{G} \tilde{p}_{C_{N+1}}} =\left(^{G} \hat{p}_{I_{N+1}}+^{G} \tilde{p}_{I_{N+1}}\right)+\left[\exp \left(\delta \theta_{I_{N+1}\leftarrow G}^{\wedge}\right)_{G}^{I_{N+1}} \hat{\overline{q}}\right]^{T} {^{I} p_{\mathcal{C}}}  \\
+\Leftrightarrow ^{G} \tilde{p}_{C_{N+1}}=^{G} \tilde{p}_{I_{N+1}}+^{I_{N+1}}_{G} \hat{q}^{T}\left(^{I} p_{C}\right)^{\wedge} \delta \theta_{I_{N+1} \leftarrow G}
+$$
+
+#### 协方差矩阵的增广
+
+当来一帧新图像后,新的协方差矩阵可写成:
+$$
+P_{k | k} \leftarrow \frac{\partial \delta T_{C_{N+1} \leftarrow G}}{\partial \overline{X}} \cdot P_{k | k} \cdot \frac{\partial \delta T_{C_{N+1}\leftarrow G}^{T}}{\partial \tilde{X}}
+$$
+即:
+$$
+\begin{aligned} P_{k | k}^{(15+6(N+1)) \times(15+6(N+1))} & \leftarrow\left[\begin{array}{c}{I_{6 N+15}} \\ {J}\end{array}\right] P_{k | k}^{(15+6 N) \times(15+6 N)}\left[\begin{array}{c}{I_{6 N+15}} \\ {J}\end{array}\right]^{T} \\=\left[\begin{array}{cc}{P_{k | k}} & {P J^{T}} \\ {J P} & {J P J^{T}}\end{array}\right] \end{aligned}
+$$
+
+其中,
+$$
+J^{6 \times(15+6 N)}=\frac{\partial \delta T_{C_{N+1}+G}}{\partial \tilde{X}}=\left[\begin{array}{ccc}{\frac{\partial \delta \theta_{C_{N+1}}}{\partial \delta \theta_{I_{N+1}}}} & {0_{3 \times 9}} & {\frac{\partial \delta \theta_{C_{N+1}}}{\partial^{G} \tilde{p}_{I_{N+1}}}} & {0_{3 \times 6 N}} \\ {\frac{\partial^{G} \tilde{p}_{C_{N+1}}}{\partial \delta \theta_{I_{N+1}}}} & {0_{3 \times 9}} & {\frac{\partial^{G} \tilde{p}_{C_{N+1}}}{\partial^{G} \tilde{p}_{I_{N+1}}}} & {0_{3 \times 6 N}}\end{array}\right] \\
+=\begin{array}{cccc}{\left[\begin{array}{c}{C(_{I}^{C} \overline{q} )} & {0_{3 \times 9}} & {0_{3 \times 3}} & {0_{3 \times 6 N}} \\ {C_{\hat{q}}^{T}\left(^{I} p_{C}\right)^{\wedge}} & {0_{3 \times 9}} & {I_{3 \times 3}} & {0_{3 \times 6 N}}\end{array}\right]}\end{array}
+$$
+
+![](/home/liu/Documents/some_notes/msckf/增广后的协方差矩阵.png)
+
+所以由上面分析可知,当新来一帧图像后,对整体协方差矩阵进行增广,并不影响原有的整体协方差矩阵,只是在原来的协方差矩阵后新增6行6列.并且增加的行列中只有与$\delta \theta_{I_{N+1}}$和$^G\tilde{p}_{I_{N+1}}$有关的两处及对角线处有值,其他处均为0.
+
+
 
 
 
