@@ -151,7 +151,7 @@ $$
 \\\doteq \Delta \tilde{\mathrm{R}}_{i j} \operatorname{Exp}\left(-\delta \phi_{i j}\right)
 $$
 
-其中,$\mathrm{J}_{r}^{k} \doteq \mathrm{J}_{r}^{k}\left(\left(\tilde{\omega}_{k}-\mathbf{b}_{i}^{g}\right) \Delta t\right)$,$\Delta \tilde{\mathrm{R}}_{i j} \doteq\prod_{k=i}^{j-1} \operatorname{Exp}\left(\left(\tilde{\omega}_{k}-\mathbf{b}_{i}^{g}\right) \Delta t\right)$,$\delta \phi_{i j}$为noise.将公式28最后一行代入到$\Delta \mathbf{v}_{i j}​$公式24中去,
+其中,$\mathrm{J}_{r}^{k} \doteq \mathrm{J}_{r}^{k}\left(\left(\tilde{\omega}_{k}-\mathbf{b}_{i}^{g}\right) \Delta t\right)$,$\Delta \tilde{\mathrm{R}}_{i j} \doteq\prod_{k=i}^{j-1} \operatorname{Exp}\left(\left(\tilde{\omega}_{k}-\mathbf{b}_{i}^{g}\right) \Delta t\right)$,$\delta \phi_{i j}$为noise.将公式28最后一行代入到$\Delta \mathbf{v}_{i j}$公式24中去,
 $$
 \Delta \mathbf{v}_{i j} \stackrel{\mathrm{} .}{\simeq} \sum_{k=i}^{j-1} \Delta \tilde{\mathrm{R}}_{i k}\left(\mathbf{I}-\delta \phi_{i k}^{\wedge}\right)\left(\tilde{\mathbf{a}}_{k}-\mathbf{b}_{i}^{a}\right) \Delta t-\Delta \tilde{\mathrm{R}}_{i k} \boldsymbol{\eta}_{k}^{a d} \Delta t
 \\\stackrel{\mathrm{}_{}\mathbb{}}{=} \Delta \tilde{\mathbf{v}}_{i j}+\sum_{k=i}^{j-1}\left[\Delta \tilde{\mathrm{R}}_{i k}\left(\tilde{\mathbf{a}}_{k}-\mathbf{b}_{i}^{a}\right)^{\wedge} \delta \boldsymbol{\phi}_{i k} \Delta t-\Delta \tilde{\mathrm{R}}_{i k} \boldsymbol{\eta}_{k}^{a d} \Delta t\right]
@@ -163,13 +163,13 @@ $$
 \\\stackrel{}{=} \Delta \tilde{\mathbf{p}}_{i j}+\sum_{k=i}^{j-1}\left[-\delta \mathbf{v}_{i k} \Delta t+\frac{1}{2} \Delta \tilde{\mathrm{R}}_{i k}\left(\tilde{\mathbf{a}}_{k}-\mathbf{b}_{i}^{a}\right)^{\wedge} \delta \boldsymbol{\phi}_{i k} \Delta t^{2}\right.-\frac{1}{2} \Delta \tilde{\mathrm{R}}_{i k} \boldsymbol{\eta}_{k}^{a d} \Delta t^{2} ]
 \\ \doteq \Delta \tilde{\mathbf{p}}_{i j}-\delta \mathbf{p}_{i j}
 $$
-将公式28,29,30代入到23,24,25中,我们就能获得预积分测量模型(记住$\operatorname{Exp}\left(-\delta \phi_{i j}\right)^{\mathrm{T}}=\operatorname{Exp}\left(\delta \boldsymbol{\phi}_{i j}\right)​$)
+将公式28,29,30代入到23,24,25中,我们就能获得预积分测量模型(记住$\operatorname{Exp}\left(-\delta \phi_{i j}\right)^{\mathrm{T}}=\operatorname{Exp}\left(\delta \boldsymbol{\phi}_{i j}\right)$)
 $$
 \begin{align} \Delta \tilde{\mathrm{R}}_{i j} &=\mathrm{R}_{i}^{\mathrm{T}} \mathrm{R}_{j} \operatorname{Exp}\left(\delta \phi_{i j}\right) \\ \Delta \tilde{\mathbf{v}}_{i j} &=\mathrm{R}_{i}^{\top}\left(\mathbf{v}_{j}-\mathbf{v}_{i}-\mathbf{g} \Delta t_{i j}\right)+\delta \mathbf{v}_{i j} \\ \Delta \tilde{\mathbf{p}}_{i j} &=\mathrm{R}_{i}^{\top}\left(\mathbf{p}_{j}-\mathbf{p}_{i}-\mathbf{v}_{i} \Delta t_{i j}-\frac{1}{2} \mathbf{g} \Delta t_{i j}^{2}\right)+\delta \mathbf{p}_{i j} \end{align}
 $$
 ##### 噪声更新
 
-我们的测量值写成测量值(这里面包含Bias)加随机噪声的形式,随机噪声描述为随机向量$\left[\delta \phi_{i j}^{\top}, \delta \mathbf{v}_{i j}^{\top}, \delta \mathbf{p}_{i j}^{\top}\right]^{\top}​$.因为噪声是零均值高斯分布,所以噪声的形式如下,
+我们的测量值写成测量值(这里面包含Bias)加随机噪声的形式,随机噪声描述为随机向量$\left[\delta \phi_{i j}^{\top}, \delta \mathbf{v}_{i j}^{\top}, \delta \mathbf{p}_{i j}^{\top}\right]^{\top}$.因为噪声是零均值高斯分布,所以噪声的形式如下,
 $$
 \boldsymbol{\eta}_{i j}^{\Delta} \doteq\left[\delta \boldsymbol{\phi}_{i j}^{\top}, \delta \mathbf{v}_{i j}^{\top}, \delta \mathbf{p}_{i j}^{\top}\right]^{\top} \sim \mathcal{N}\left(\mathbf{0}_{9 \times 1}, \boldsymbol{\Sigma}_{i j}\right)
 $$
@@ -177,7 +177,7 @@ $$
 $$
 \operatorname{Exp}\left(-\delta \boldsymbol{\phi}_{i j}\right) \doteq \prod_{k=i}^{j-1} \operatorname{Exp}\left(-\Delta \tilde{\mathrm{R}}_{k+1 j}^{\mathrm{T}} \mathrm{J}_{r}^{k} \boldsymbol{\eta}_{k}^{g d} \Delta t\right)
 $$
-两本取${\mathbf{Log}}​$,得到
+两本取${\mathbf{Log}}$,得到
 $$
 \delta \phi_{i j}=-{\mathbf{Log}} \left(\prod_{k=i}^{j-1} \operatorname{Exp}\left(-\Delta \tilde{\mathbf{R}}_{k+1 j}^{\top} J_{r}^{k} \eta_{k}^{g d} \Delta t\right)\right)
 $$
@@ -196,11 +196,11 @@ $$
 
 这两个相比公式29,30中的多加一个负号.
 
-因为公式36,37,38表示预积分噪音$\eta_{i j}^{\Delta}​$是IMU测量噪声$\boldsymbol{\eta}_{k}^{d} \doteq\left[\boldsymbol{\eta}_{k}^{g {d}}, \boldsymbol{\eta}_{k}^{a d}\right]​$的线性函数,所以我们通过简单的线性函数可以计算出$\boldsymbol{\eta}_{k}^{d}​$的协方差矩阵,称为$\boldsymbol{\Sigma}_{i j}​$,具体见附录.
+因为公式36,37,38表示预积分噪音$\eta_{i j}^{\Delta}$是IMU测量噪声$\boldsymbol{\eta}_{k}^{d} \doteq\left[\boldsymbol{\eta}_{k}^{g {d}}, \boldsymbol{\eta}_{k}^{a d}\right]$的线性函数,所以我们通过简单的线性函数可以计算出$\boldsymbol{\eta}_{k}^{d}$的协方差矩阵,称为$\boldsymbol{\Sigma}_{i j}$,具体见附录.
 
 ##### 合并偏置更新
 
-在前面我们没考虑到bias的变化,我们默认bias没有变化,但是在优化的时候,bias测量值会有一个小值变化$\delta b​$,有一种方法就是在变化的时候重新计算delta值,但是这计算量太大了.相反,如果bias更新了$\mathbf{b} \leftarrow \overline{\mathbf{b}}+\delta \mathbf{b}​$,我们可以通过一阶展开更新delta值,
+在前面我们没考虑到bias的变化,我们默认bias没有变化,但是在优化的时候,bias测量值会有一个小值变化$\delta b$,有一种方法就是在变化的时候重新计算delta值,但是这计算量太大了.相反,如果bias更新了$\mathbf{b} \leftarrow \overline{\mathbf{b}}+\delta \mathbf{b}$,我们可以通过一阶展开更新delta值,
 $$
 \begin{align} 
 \Delta \tilde{\mathrm{R}}_{i j}\left(\mathbf{b}_{i}^{g}\right) \simeq \Delta \tilde{\mathrm{R}}_{i j}\left(\overline{\mathbf{b}}_{i}^{g}\right) \operatorname{Exp}\left(\frac{\partial \Delta \overline{\mathrm{R}}_{i j}}{\partial \mathrm{b}^{g}} \delta \mathbf{b}^{g}\right)
@@ -304,7 +304,7 @@ $$
 $$
 \boldsymbol{\eta}_{i j}^{\Delta}=\mathbf{A}_{j-1} \boldsymbol{\eta}_{i j-1}^{\Delta}+\mathbf{B}_{j-1} \boldsymbol{\eta}_{j-1}^{d}
 $$
-从公式中我们可以得到IMU测量数据噪声$\eta_{k}^{d}​$协方差矩阵$\boldsymbol{\Sigma}_{\boldsymbol{\eta}} \in \mathbb{R}^{6 \times 6}​$
+从公式中我们可以得到IMU测量数据噪声$\eta_{k}^{d}$协方差矩阵$\boldsymbol{\Sigma}_{\boldsymbol{\eta}} \in \mathbb{R}^{6 \times 6}$
 $$
 \mathbf{\Sigma}_{i j}=\mathbf{A}_{j-1} \boldsymbol{\Sigma}_{i j-1} \mathbf{A}_{j-1}^{\top}+\mathbf{B}_{j-1} \mathbf{\Sigma}_{\eta} \mathbf{B}_{j-1}^{\top}
 $$
@@ -332,7 +332,7 @@ $$
 \Delta \tilde{\mathrm{R}}_{i j}\left(\hat{\mathbf{b}}_{i}\right)=\Delta \overline{\mathrm{R}}_{i j} \prod_{k=i}^{j-1} \operatorname{Exp}\left(-\Delta \tilde{\mathrm{R}}_{k+1 j}\left(\overline{\mathbf{b}}_{i}\right)^{\top} \mathrm{J}_{r}^{k} \delta \mathbf{b}_{i}^{g} \Delta t\right)
 \\ =\Delta \overline{\mathrm{R}}_{i j} \operatorname{Exp}\left(\frac{\partial \Delta \overline{\mathrm{R}}_{i j}}{\partial \mathbf{b}^{g}} \delta \mathbf{b}_{i}^{g}\right)
 $$
-下面我们要推$\Delta \tilde{\mathbf{v}}_{i j}\left(\hat{\mathbf{b}}_{i}\right)​$的公式,代入上式,即可得到,
+下面我们要推$\Delta \tilde{\mathbf{v}}_{i j}\left(\hat{\mathbf{b}}_{i}\right)$的公式,代入上式,即可得到,
 $$
 \Delta \tilde{\mathbf{v}}_{i j}\left(\hat{\mathbf{b}}_{i}\right)=\sum_{k=i}^{j-1} \Delta \tilde{\mathbf{R}}_{i k}\left(\hat{\mathbf{b}}_{i}\right)\left(\tilde{\mathbf{a}}_{k}-\overline{\mathbf{b}}_{i}^{a}-\delta \mathbf{b}_{i}^{a}\right) \Delta t
 \\ \stackrel{}{\simeq} \sum_{k=i}^{j-1} \Delta \overline{\mathrm{R}}_{i k} \operatorname{Exp}\left(\frac{\partial \Delta \overline{\mathrm{R}}_{i k}}{\partial \mathbf{b}^{g}} \delta \mathbf{b}_{i}^{g}\right)\left(\tilde{\mathbf{a}}_{k}-\overline{\mathbf{b}}_{i}^{a}-\delta \mathbf{b}_{i}^{a}\right) \Delta t
@@ -361,9 +361,9 @@ $$
 \begin{array}{llll}{\mathrm{R}_{i}}  {\leftarrow}  {\mathrm{R}_{i} \operatorname{Exp}\left(\delta \phi_{i}\right),}  {\mathrm{R}_{j}}  {\leftarrow}  {\mathrm{R}_{j} \operatorname{Exp}\left(\delta \phi_{j}\right)} \\ {\mathbf{p}_{i}}  {\leftarrow}  {\mathbf{p}_{i}+\mathrm{R}_{i} \delta \mathbf{p}_{i},}  {\mathbf{p}_{j}}  {\leftarrow}  {\mathbf{p}_{j}+\mathrm{R}_{j} \delta \mathbf{p}_{j}} \\ {\mathbf{v}_{i}} {\leftarrow}  {\mathbf{v}_{i}+\delta \mathbf{v}_{i},}  {\mathbf{v}_{j}}  {\leftarrow}  {\mathbf{v}_{j}+\delta \mathbf{v}_{i}} \\ {\delta \mathbf{b}_{i}^{g}}  {\leftarrow \delta \mathbf{b}_{i}^{g}+\tilde{\delta} \mathbf{b}_{i}^{g},}  {\delta \mathbf{b}_{i}^{a}}  {\leftarrow}  {\delta \mathbf{b}_{i}^{a}+\delta \mathbf{b}_{i}^{a}}\end{array}
 $$
 
-1. 计算$\mathbf{r}_{\Delta \mathbf{p}_{i j}}​$的雅克比
+1. 计算$\mathbf{r}_{\Delta \mathbf{p}_{i j}}$的雅克比
 
-因为$\mathbf{r}_{\Delta \mathbf{p}_{i j}}$和$\delta \mathbf{b}_{i}^{g}$,$\delta \mathbf{b}_{i}^{a}$线性相关,所以$\mathbf{r}_{\Delta \mathbf{p}_{i j}}$对$\delta \mathbf{b}_{i}^{g}$,$\delta \mathbf{b}_{i}^{a}$的雅克比就是$\delta \mathbf{b}_{i}^{g}$,$\delta \mathbf{b}_{i}^{a}$的系数,并且$\mathbf{r}_{\Delta \mathbf{p}_{i j}}$中并没有$\mathrm{R}_{j}$ 和 $\mathbf{v}_{j}​$所以这两个的雅克比为0,接下来我们要计算剩下的雅克比,
+因为$\mathbf{r}_{\Delta \mathbf{p}_{i j}}$和$\delta \mathbf{b}_{i}^{g}$,$\delta \mathbf{b}_{i}^{a}$线性相关,所以$\mathbf{r}_{\Delta \mathbf{p}_{i j}}$对$\delta \mathbf{b}_{i}^{g}$,$\delta \mathbf{b}_{i}^{a}$的雅克比就是$\delta \mathbf{b}_{i}^{g}$,$\delta \mathbf{b}_{i}^{a}$的系数,并且$\mathbf{r}_{\Delta \mathbf{p}_{i j}}$中并没有$\mathrm{R}_{j}$ 和 $\mathbf{v}_{j}$所以这两个的雅克比为0,接下来我们要计算剩下的雅克比,
 
 $$
 \begin{array} \mathbf{r}_{\Delta \mathbf{p}_{i j}}\left(\mathbf{p}_{i}+\mathrm{R}_{i} \delta \mathbf{p}_{i}\right) &=\mathrm{R}_{i}^{\top}\left(\mathbf{p}_{j}-\mathbf{p}_{i}-\mathrm{R}_{i} \delta \mathbf{p}_{i}-\mathbf{v}_{i} \Delta t_{i j}-\frac{1}{2} \mathbf{g} \Delta t_{i j}^{2}\right)-C \\ &=\mathbf{r}_{\Delta \mathbf{p}_{i j}}\left(\mathbf{p}_{i}\right)+\left(-\mathbf{I}_{3 \times 1}\right) \delta \mathbf{p}_{i} \end{array}
@@ -386,7 +386,7 @@ $$
 \end{array}
 $$
 
-在上面的公式中,$C \doteq \Delta \tilde{\mathbf{p}}_{i j}+\frac{\partial \Delta \overline{\mathbf{p}}_{i j}}{\partial \mathbf{b}_{i}^{g}} \delta \mathbf{b}_{i}^{g}+\frac{\partial \Delta \overline{\mathbf{p}}_{i j}}{\partial \mathbf{b}_{i}^{a}} \delta \mathbf{b}_{i}^{a}​$.
+在上面的公式中,$C \doteq \Delta \tilde{\mathbf{p}}_{i j}+\frac{\partial \Delta \overline{\mathbf{p}}_{i j}}{\partial \mathbf{b}_{i}^{g}} \delta \mathbf{b}_{i}^{g}+\frac{\partial \Delta \overline{\mathbf{p}}_{i j}}{\partial \mathbf{b}_{i}^{a}} \delta \mathbf{b}_{i}^{a}$.
 
 所以$\mathbf{r}_{\Delta \mathbf{p}_{i j}}$的雅克比为,
 $$
@@ -399,9 +399,9 @@ $$
 \end{array}
 $$
 
-2. 计算$\mathbf{r}_{\Delta \mathbf{v}_{i j}}​$的雅克比
+2. 计算$\mathbf{r}_{\Delta \mathbf{v}_{i j}}$的雅克比
 
-和$\mathbf{r}_{\Delta \mathbf{p}_{i j}}​$一样,$\mathbf{r}_{\Delta \mathbf{v}_{i j}}​$和$\delta \mathbf{b}_{i}^{g}​$,$\delta \mathbf{b}_{i}^{a}​$线性相关,对$\delta \mathbf{b}_{i}^{g}​$,$\delta \mathbf{b}_{i}^{a}​$的雅克比就是$\delta \mathbf{b}_{i}^{g}​$,$\delta \mathbf{b}_{i}^{a}​$的系数,并且并且$\mathbf{r}_{\Delta \mathbf{v}_{i j}}​$中并没有$\mathrm{R}_{j}​$ 和 $\mathbf{p}_{i}​$,$\mathbf{p}_{j}​$所以这三个的雅克比为0,接下来我们要计算剩下的雅克比,
+和$\mathbf{r}_{\Delta \mathbf{p}_{i j}}$一样,$\mathbf{r}_{\Delta \mathbf{v}_{i j}}$和$\delta \mathbf{b}_{i}^{g}$,$\delta \mathbf{b}_{i}^{a}$线性相关,对$\delta \mathbf{b}_{i}^{g}$,$\delta \mathbf{b}_{i}^{a}$的雅克比就是$\delta \mathbf{b}_{i}^{g}$,$\delta \mathbf{b}_{i}^{a}$的系数,并且并且$\mathbf{r}_{\Delta \mathbf{v}_{i j}}$中并没有$\mathrm{R}_{j}$ 和 $\mathbf{p}_{i}$,$\mathbf{p}_{j}$所以这三个的雅克比为0,接下来我们要计算剩下的雅克比,
 $$
 \begin{array} \mathbf{r}_{\Delta \mathbf{v}_{i j}}\left(\mathbf{v}_{i}+\delta \mathbf{v}_{i}\right) &=\mathbf{R}_{i}^{\top}\left(\mathbf{v}_{j}-\mathbf{v}_{i}-\delta \mathbf{v}_{i}-\mathbf{g} \Delta t_{i j}\right)-D \\ &=\mathbf{r}_{\Delta \mathbf{v}}\left(\mathbf{v}_{i}\right)-\mathbf{R}_{i}^{\top} \delta \mathbf{v}_{i} \\ \mathbf{r}_{\Delta \mathbf{v}_{i j}}\left(\mathbf{v}_{j}+\delta \mathbf{v}_{j}\right) &=\mathbf{R}_{i}^{\top}\left(\mathbf{v}_{j}+\delta \mathbf{v}_{j}-\mathbf{v}_{i}-\mathbf{g} \Delta t_{i j}\right)-D \\ &=\mathbf{r}_{\Delta \mathbf{v}}\left(\mathbf{v}_{j}\right)+\mathrm{R}_{i}^{\top} \delta \mathbf{v}_{j} 
 
@@ -428,6 +428,6 @@ $$
 
 ![](/home/liu/Documents/some_notes/VIO公式推导/r_rij导数.png)
 
-在上面的公式中,$E \doteq \operatorname{Exp}\left(\frac{\partial \Delta \overline{\mathrm{R}}_{i j}}{\partial \mathrm{b}^{g}} \delta \mathbf{b}^{g}\right)$,$\mathrm{J}_{r}^{b} \doteq \mathrm{J}_{r}\left(\frac{\partial \Delta \overline{\mathrm{R}}_{i j}}{\partial \mathrm{b}^{g}} \delta \mathrm{b}_{i}^{g}\right)​$
+在上面的公式中,$E \doteq \operatorname{Exp}\left(\frac{\partial \Delta \overline{\mathrm{R}}_{i j}}{\partial \mathrm{b}^{g}} \delta \mathbf{b}^{g}\right)$,$\mathrm{J}_{r}^{b} \doteq \mathrm{J}_{r}\left(\frac{\partial \Delta \overline{\mathrm{R}}_{i j}}{\partial \mathrm{b}^{g}} \delta \mathrm{b}_{i}^{g}\right)$
 
 ![](/home/liu/Documents/some_notes/VIO公式推导/r_rij公式合集.png)
