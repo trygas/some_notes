@@ -126,7 +126,7 @@ $$
 
 下图会用$f_1$和$f_2$这两个路标点进行视觉更新,$f_1$是因为太老,被滑窗所有帧都看见;$f_2$是不被当前帧$T_5$所观测到了,$f_3$因为还能被当前帧观测到,且不算太老,所以留在窗口中继续跟踪.
 
-![](/home/liu/Documents/some_notes/msckf/MSCKF_optimize_variants.png)
+![](./MSCKF_optimize_variants.png)
 
 优化变量的数学形式为
 $$
@@ -170,7 +170,7 @@ $$
 $$
 \tilde{X}_{I M U_{k+1}}=\Phi\left(t_{k}+\Delta T, t_{k}\right) \tilde{X}_{I M U_{k}}+(G \Delta T) n_{I M U}
 $$
-其中,$\Delta T$为第k个IMU时刻到第k+1个IMU时刻的间隔,$\Phi$为第k时刻的IMU误差项到第k+1时刻的变换关系,有些文献将$\Phi$写成指数形式,还有写文献携程近似形式:
+其中,$\Delta T$为第k个IMU时刻到第k+1个IMU时刻的间隔,$\Phi$为第k时刻的IMU误差项到第k+1时刻的变换关系,有些文献将$\Phi$写成指数形式,还有写文献写成近似形式:
 $$
 \Phi\left(t_{k}+\Delta T, t_{k}\right)=\exp (F \Delta T) \cong \mathrm{I}_{15 \times 15}+F \Delta T
 $$
@@ -186,14 +186,14 @@ $$
 
 下图给出了整体IDE误差状态向量,以及整体的协方差矩阵.
 
-![](/home/liu/Documents/some_notes/msckf/第k时刻的整体误差状态向量和整体协方差矩阵.png)
+![](./第k时刻的整体误差状态向量和整体协方差矩阵.png)
 
 当下一个IMU,即第k+1个IMU来到后,此时k+1时刻的整体协方差矩阵可写为:
 $$
 P_{k+1 | k}^{(15+6 N) \times(15+6 N)}=\left[\begin{array}{cc}{P_{I I_{k+1 | k}}} & {\Phi\left(t_{k}+\Delta T, t_{k}\right) P_{I C_{k | k}}} \\ {P_{I C_{k | k}}^{T} \Phi\left(t_{k}+\Delta T, t_{k}\right)^{T}} & {P_{C C_{k | k}}}\end{array}\right]
 $$
 第k+1时刻的整体协方差矩阵可用下图表示:
-![](/home/liu/Documents/some_notes/msckf/k+1时刻协方差矩阵.png)
+![](./k+1时刻协方差矩阵.png)
 
 计算$P_{I I_{k+1 | k}}$:
 $$
@@ -258,9 +258,57 @@ J^{6 \times(15+6 N)}=\frac{\partial \delta T_{C_{N+1}+G}}{\partial \tilde{X}}=\l
 =\begin{array}{cccc}{\left[\begin{array}{c}{C(_{I}^{C} \overline{q} )} & {0_{3 \times 9}} & {0_{3 \times 3}} & {0_{3 \times 6 N}} \\ {C_{\hat{q}}^{T}\left(^{I} p_{C}\right)^{\wedge}} & {0_{3 \times 9}} & {I_{3 \times 3}} & {0_{3 \times 6 N}}\end{array}\right]}\end{array}
 $$
 
-![](/home/liu/Documents/some_notes/msckf/增广后的协方差矩阵.png)
+![](./增广后的协方差矩阵.png)
 
 所以由上面分析可知,当新来一帧图像后,对整体协方差矩阵进行增广,并不影响原有的整体协方差矩阵,只是在原来的协方差矩阵后新增6行6列.并且增加的行列中只有与$\delta \theta_{I_{N+1}}$和$^G\tilde{p}_{I_{N+1}}$有关的两处及对角线处有值,其他处均为0.
+
+#### 视觉测量模型
+
+对于第$j$个路标点,它在第$i$个相机中所观测到的重投影误差为:
+$$
+r^{2 \times 1}=P_{c}-\hat{P}_{c}
+$$
+其中,$P_c$为该路标点被第$i$个相机实际观测到的,在归一化相机系下的坐标值,可根据CCD像素平面的坐标值推导可得:
+$$
+P_{c}=\left[\begin{array}{l}{\frac{x}{z}} \\ {\frac{y}{z}}\end{array}\right]+n=\left[\begin{array}{c}{\frac{u-c_{x}}{f_{x}}} \\ {\frac{v-c_{y}}{f_{y}}}\end{array}\right]+n
+$$
+其中,$n$为在归一化坐标系下的视觉测量误差,可根据标定的像素误差计算在归一化坐标系下的值来得到.
+
+而$\hat{P}_{c}$为计算得到的在归一化相机系下的坐标值,
+$$
+\hat{P}_{c}=\left[\begin{array}{l}{\frac{\hat{x}}{\hat{z}}} \\ {\frac{\hat{y}}{\hat{z}}}\end{array}\right]
+$$
+其中,路标点在相机系下的坐标值可以通过下式获得(**用世界坐标系下的路标点坐标减去世界坐标系的光心坐标,再左乘一个世界到相机的旋转矩阵**)
+$$
+\hat{P}_{c}^{\prime}=\left[\begin{array}{l}{\widehat{x}} \\ {\hat{y}} \\ {\hat{z}}\end{array}\right]=C\left(\begin{array}{c}{^{C_{i}} _{G}\hat{\overline q}} \end{array}\right)\left(\begin{array}{c}{^{G} \hat{p}_{f_{j}}-^{G} \hat{p}_{c_{i}} )}\end{array}\right.
+$$
+
+#### 视觉雅克比计算
+
+下面我们来计算$r$相对于当前时刻下的整体误差状态向量$\tilde{X}$和第$j$个路标点在世界坐标系下的坐标$P_{w}=^{G} \hat{p}_{f_{j}}$来分别求雅克比.
+
+根据常见的高斯牛顿思路,可将误差在线性化点处进行展开,$e(x+\delta x) \approx e(x)+\frac{\partial e}{\partial x} \delta x$.
+
+对于我们这里讨论的误差状态向量,其线性化点在0处,即误差的状态分布为均值为0的高斯分布.那么,重投影误差可近似展开为如下形式,
+$$
+r^{2 \times 1} \cong H_{X}^{2 \times(15+6 N)} \tilde{X}^{(15+6 N) \times 1}+H_{f_{j}}^{2 \times 3} \hat{p}_{f_{j}}^{3 \times 1}+n^{2 \times 1}
+$$
+其中,$n_i$的协方差矩阵为$R=\sigma_{i m g}^{2} I_{2}$.
+
+根据链式法则,可计算出关于整体误差状态向量$\tilde X$的雅克比
+$$
+H_{X} = \frac{\partial r}{\partial \tilde{X}}=\frac{\partial r}{\partial P_{c}^{\prime}} \frac{\partial P_{c}^{\prime}}{\partial \tilde{X}}\\
+=[0_{2 \times 15} \quad 0_{2 \times 6} \cdots J_{P_{c}^{\prime}}\left[R_{C\leftarrow G}\left(t_{G\leftarrow C}-P_{G}\right)\right]^{\Lambda}-J_{P_{c}^{\prime}} R_{C\leftarrow G}]
+$$
+上面关于误差状态向量的雅克比可以用下图形象表示,只有观测到该路标点的第$i$个相机位姿处(图中红色块)有值,其他处均为0
+
+![](./重投影误差的雅克比.png)
+
+
+
+
+
+
 
 
 
