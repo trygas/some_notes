@@ -144,3 +144,45 @@ $$
 \dot{\mathbf{q}} \otimes \delta \mathbf{q}+\mathbf{q} \otimes \dot{\delta} \mathbf{q}=\frac{1}{2} \mathbf{q} \otimes \delta \mathbf{q} \otimes \boldsymbol{\omega}_{t}
 $$
 
+$$
+\frac{1}{2} \mathbf{q} \otimes \omega \otimes \delta \mathbf{q}+\mathbf{q} \otimes \dot{\delta} \mathbf{q}=\frac{1}{2} \mathbf{q} \otimes \delta \mathbf{q} \otimes \boldsymbol{\omega}_{t}
+$$
+
+现在我们想要求$\dot{\delta \theta}$,我们首先用上面的公式获得以下结果:
+$$
+\begin{array}
+2q\otimes \dot{\delta q}&=q\otimes \delta q \otimes w_t - q\otimes w\otimes\delta q\\
+&=q\otimes(\delta q\otimes w_t - w\otimes \delta q)\end{array}
+$$
+然后:
+$$
+\begin{align}\left[\begin{array}{c}{0} \\ {\delta \boldsymbol{\theta}}\end{array}\right]&=2 \dot{\delta \mathbf{q}}=\delta \mathbf{q} \otimes \boldsymbol{\omega}_{t}-\boldsymbol{\omega} \otimes \delta \mathbf{q}\\
+&=[\mathbf{q}]_{R}\left(\boldsymbol{\omega}_{t}\right) \delta \mathbf{q}-[\mathbf{q}]_{L}(\boldsymbol{\omega}) \delta \mathbf{q}\\
+&=\left[\begin{array}{cc}{0} & {-\left(\omega_{t}-\omega\right)^{\top}} \\ {\left(\omega_{t}-\omega\right)} & {-\left[\omega_{t}+\omega\right]_{ \times}}\end{array}\right]\left[\begin{array}{c}{1} \\ {\delta \boldsymbol{\theta} / 2}\end{array}\right]+O\left(\|\boldsymbol{\delta} \boldsymbol{\theta}\|^{2}\right)\\
+&=\left[\begin{array}{cc}{0} & {-\delta \omega^{\top}} \\ {\delta \omega} & {-[2 \omega+\delta \omega]_{ \times}}\end{array}\right]\left[\begin{array}{c}{1} \\ {\delta \boldsymbol{\theta} / 2}\end{array}\right]+O\left(\|\delta \boldsymbol{\theta}\|^{2}\right)\end{align}
+$$
+这就是产生了两个公式:
+$$
+\begin{align} 0 &=\delta \boldsymbol{\omega}^{\top} \delta \boldsymbol{\theta}+O\left(|\delta \boldsymbol{\theta}|^{2}\right) \\ \dot{\delta} \boldsymbol{\theta} &=\delta \boldsymbol{\omega}-[\boldsymbol{\omega}]_{ \times} \delta \boldsymbol{\theta}-\frac{1}{2}[\delta \boldsymbol{\omega}]_{ \times} \delta \boldsymbol{\theta}+O\left(\|\delta \boldsymbol{\theta}\|^{2}\right) \end{align}
+$$
+如果忽略了二阶以上的高阶项,我们就能得到以下的公式:
+$$
+\dot{\delta \boldsymbol{\theta}}=-[\boldsymbol{\omega}]_{\mathbf{x}} \delta \boldsymbol{\theta}+\delta \boldsymbol{\omega}
+$$
+代入公式(22),我们就能得到:
+$$
+\dot{\delta \boldsymbol{\theta}}=-\left[\boldsymbol{\omega}_{m}-\boldsymbol{\omega}_{b}\right]_{ \times} \delta \boldsymbol{\theta}-\delta \boldsymbol{\omega}_{b}-\boldsymbol{\omega}_{n}
+$$
+
+### 离散时间的系统运动
+
+#### 标称状态运动学
+
+我们可以将标称状态运动学差分公式写成如下形式:
+$$
+\begin{array}{l}{\mathbf{p} \leftarrow \mathbf{p}+\mathbf{v} \Delta t+\frac{1}{2}\left(\mathbf{R}\left(\mathbf{a}_{m}-\mathbf{a}_{b}\right)+\mathbf{g}\right) \Delta t^{2}} \\ {\mathbf{v} \leftarrow \mathbf{v}+\left(\mathbf{R}\left(\mathbf{a}_{m}-\mathbf{a}_{b}\right)+\mathbf{g}\right) \Delta t} \\ {\mathbf{q} \leftarrow \mathbf{q} \otimes \mathbf{q}\left\{\left(\boldsymbol{\omega}_{m}-\boldsymbol{\omega}_{b}\right) \Delta t\right\}} \\ {\mathbf{a}_{b} \leftarrow \mathbf{a}_{b}} \\ {\boldsymbol{\omega}_{b} \leftarrow \boldsymbol{\omega}_{b}} \\ {\mathbf{g} \leftarrow \mathbf{g}}\end{array}
+$$
+其中,$x \leftarrow f(x, \bullet)$代表着时间更新$x_{k+1}=f\left(x_{k}, \bullet_{k}\right)$,$\mathbf{R} \triangleq \mathbf{R}\{\mathbf{q}\}$是当前标称旋转$\mathbf{q}$的旋转矩阵,$\mathrm{q}\{v\}$是旋转$v$的四元数.
+
+#### 离散时间运动学
+
