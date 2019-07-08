@@ -252,6 +252,19 @@ $$
 $$
 在一个时间间隔$\Delta t$内的积分后,我们得到$\mathbf{x}_{n+1}=e^{(\mathbf{A} \Delta t)} \cdot \mathbf{x}_{n}=\Phi \cdot \mathbf{x}_{n}$,
 
+这里的转移矩阵$\Phi$是一个泰勒展开式,每一项都是在上一项的基础上乘以一个$\mathbf{A}\Delta t$.我们能得到一些$\mathbf{A}$的乘积如下表示:
+$$
+\mathbf{A}=\left[\begin{array}{ccc}{0} & {\mathbf{P}_{\mathbf{v}}} & {0} \\ {0} & {0} & {\mathbf{V}_{\boldsymbol{\theta}}} \\ {0} & {0} & {\Theta_{\boldsymbol{\theta}}}\end{array}\right], \mathbf{A}^{2}=\left[\begin{array}{cccc}{0} & {0} & {\mathbf{P}_{v} \mathbf{V}_{\boldsymbol{\theta}}} \\ {0} & {0} & {\mathbf{V}_{\boldsymbol{\theta}} \Theta_{\boldsymbol{\theta}}} \\ {0} & {0} & {\Theta_{\boldsymbol{\theta}}^{2}}\end{array}\right], \\
+\mathbf{A}^{3}=\left[\begin{array}{ccc}{0} & {0} & {\mathbf{P}_{\boldsymbol{\theta}} \mathbf{V}_{\boldsymbol{\theta}} \Theta_{\boldsymbol{\theta}}} \\ {0} & {0} & {\boldsymbol{\theta}_{\boldsymbol{\theta}} \Theta_{\boldsymbol{\theta}}^{2}} \\ {0} & {0} & {\Theta_{\boldsymbol{\theta}}^{3}}\end{array}\right], \mathbf{A}^{4}=\left[\begin{array}{ccc}{0} & {0} & {\mathbf{V}_{\boldsymbol{\theta}} \mathbf{V}_{\boldsymbol{\theta}} \Theta_{\boldsymbol{\theta}}^{2}} \\ {0} & {0} & {\boldsymbol{\theta}_{\boldsymbol{\theta}} \Theta_{\boldsymbol{\theta}}^{3}} \\ {0} & {0} & {\Theta_{\boldsymbol{\theta}}^{4}}\end{array}\right]
+$$
+对于k>1的时候,我们有
+$$
+\mathbf{A}^{k>1}=\left[\begin{array}{ccc}{0} & {0} & {\mathbf{P}_{v} \mathbf{V}_{\boldsymbol{\theta}} \Theta_{\boldsymbol{\theta}}^{k-2}} \\ {0} & {0} & {\mathbf{V}_{\boldsymbol{\theta}} \Theta_{\boldsymbol{\theta}}^{k-1}} \\ {0} & {0} & {\Theta_{\boldsymbol{\theta}}^{k}}\end{array}\right]
+$$
+
+我们可以看到这个A的k次方有固定部分和
+
+
 
 
 
