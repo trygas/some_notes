@@ -184,5 +184,13 @@ $$
 $$
 其中,$x \leftarrow f(x, \bullet)$代表着时间更新$x_{k+1}=f\left(x_{k}, \bullet_{k}\right)$,$\mathbf{R} \triangleq \mathbf{R}\{\mathbf{q}\}$是当前标称旋转$\mathbf{q}$的旋转矩阵,$\mathrm{q}\{v\}$是旋转$v$的四元数.
 
-#### 离散时间运动学
+#### 误差状态运动学
 
+标称状态部分通常都是确定的,而误差部分的积分通常都要加上随机脉冲,公式如下
+$$
+\begin{array} \delta \mathbf{p} & \leftarrow \delta \mathbf{p}+\delta \mathbf{v} \Delta t \\ \delta \mathbf{v} & \leftarrow \delta \mathbf{v}+\left(-\mathbf{R}\left[\mathbf{a}_{m}-\mathbf{a}_{b}\right]_{ \times} \delta \boldsymbol{\theta}-\mathbf{R} \delta \mathbf{a}_{b}+\delta \mathbf{g}\right) \Delta t+\mathbf{v}_{\mathbf{i}} \\ \delta \boldsymbol{\theta} & \leftarrow \mathbf{R}^{\top}\left\{\left(\boldsymbol{\omega}_{m}-\boldsymbol{\omega}_{b}\right) \Delta t\right\} \delta \boldsymbol{\theta}-\delta \boldsymbol{\omega}_{b} \Delta t+\boldsymbol{\theta}_{\mathbf{i}} \\ \delta \mathbf{a}_{b} & \leftarrow \delta \mathbf{a}_{b}+\mathbf{a}_{\mathbf{i}} \\ \delta \boldsymbol{\omega}_{b} & \leftarrow \delta \boldsymbol{\omega}_{b}+\boldsymbol{\omega}_{\mathbf{i}} \\ \delta \mathbf{g} & \leftarrow \delta \mathbf{g} \end{array}
+$$
+在这里,$\mathbf{v}_{\mathbf{i}}, \boldsymbol{\theta}_{\mathbf{i}}, \mathbf{a}_{\mathbf{i}}$ 和$\omega_{\mathbf{i}}$都是随机噪声,建模为高斯白噪声.均值为0,协方差矩阵通过对$\mathbf{a}_{n}, \boldsymbol{\omega}_{n}, \mathbf{a}_{w}$ 和 $\boldsymbol{\omega}_{w}$的协方差矩阵在时间长度$\Delta t$进行积分获得
+$$
+\begin{array}{l}{\mathbf{V}_{\mathbf{i}}=\sigma_{\tilde{\mathbf{a}}_{w}}^{2}} \\ {\Theta_{\mathbf{i}}=\sigma_{\hat{\omega}_{w}}^{2}} \\ {\mathbf{A}_{\mathbf{i}}=\sigma_{\mathbf{a}_{w}}^{2} \Delta t \mathbf{I}} \\ {\mathbf{\Omega}_{\mathbf{i}}=\sigma_{\omega_{w}}^{2} \Delta t \mathbf{I}}\end{array}
+$$
