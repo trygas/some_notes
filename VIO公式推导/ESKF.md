@@ -204,6 +204,65 @@ $$
 \dot{\mathbf{x}}(t)=\mathbf{A} \cdot \mathbf{x}(t)
 $$
 
+如果是一阶线性微分方程的话,在$\left[t_{n}, t_{n}+\Delta t\right]$的时间间隔内的积分公式如下:
+$$
+\mathbf{x}_{n+1}=e^{\mathbf{A} \Delta t}\mathbf{x}_{n}=\Phi{\mathbf{x}_{n}}
+$$
+
+上面这个公式是因为$\mathbf{x}_{n+1}=\mathbf{x}_n+\dot{\mathbf{x}}(t)\cdot\Delta t$,这个公式忽略了高次项,那么将上式展开就是左边的这个公式了.
+
+上面公式中的$\Phi$被称为转移矩阵.转移矩阵的泰勒展开式为:
+$$
+\Phi=e^{\mathbf{A} \Delta t}=\mathbf{I}+\mathbf{A} \Delta t+\frac{1}{2} \mathbf{A}^{2} \Delta t^{2}+\frac{1}{3 !} \mathbf{A}^{3} \Delta t^{3}+\cdots=\sum_{k=0}^{\infty} \frac{1}{k !} \mathbf{A}^{k} \Delta t^{k}
+$$
+
+##### 角度误差的积分
+
+如果不考虑偏置和噪声,角度误差的动力学方程为:
+$$
+\dot{\delta \boldsymbol{\theta}}=-[\boldsymbol{\omega}]_{ \times} \delta \boldsymbol{\theta}
+$$
+其中的转移矩阵可以通过泰勒展开公式写成如下形式:
+$$
+\begin{array} \Phi &=e^{-[\omega]_{\times} \Delta t} \\ &=\mathbf{I}-[\boldsymbol{\omega}]_{ \times} \Delta t+\frac{1}{2}[\boldsymbol{\omega}]_{ \times}^{2} \Delta t^{2}-\frac{1}{3 !}[\boldsymbol{\omega}]_{ \times}^{3} \Delta t^{3}+\frac{1}{4 !}[\boldsymbol{\omega}]_{ \times}^{4} \Delta t^{4}-\ldots \end{array}
+$$
+现在,定义$\omega \Delta t \triangleq \mathbf{u} \Delta \theta$,我们可以得到
+$$
+\begin{array} \Phi &=\mathbf{I}-[\mathbf{u}]_{ \times} \Delta \theta+\frac{1}{2}[\mathbf{u}]_{ \times}^{2} \Delta \theta^{2}-\frac{1}{3 !}[\mathbf{u}]_{ \times}^{3} \Delta \theta^{3}+\frac{1}{4 !}[\mathbf{y}]_{ \times}^{4} \Delta \theta^{4}-\ldots ) \\ &=\mathbf{I}-[\mathbf{u}]_{ \times}\left(\Delta \theta-\frac{\Delta \theta^{3}}{3 !}+\frac{\Delta \theta^{5}}{5 !}-\cdots\right)+[\mathbf{u}]_{ \times}^{2}\left(\frac{\Delta \theta^{2}}{2 !}-\frac{\Delta \theta^{4}}{4 !}+\frac{\Delta \theta^{6}}{6 !}-\cdots\right) \\ &=\mathbf{I}-[\mathbf{u}]_{ \times} \sin \Delta \theta+[\mathbf{u}]_{ \times}^{2}(1-\cos \Delta \theta) \end{array}
+$$
+上面这个公式很常见,就是罗德里格斯公式,所以转移矩阵可以写为$\Phi=\mathbf{R}\{-\mathbf{u} \Delta \theta\}=\mathbf{R}\{\boldsymbol{\omega} \Delta t\}^{\top}$.
+
+##### 简单的IMU例子
+
+IMU的误差状态动力学方程可以写成如下形式:
+$$
+\begin{array} \dot{\delta \mathbf{p}} &=\delta \mathbf{v} \\ \dot{\delta \mathbf{v}} &=-\mathbf{R}[\mathbf{a}]_{ \times} \delta \boldsymbol{\theta} \\ \dot{\delta} \boldsymbol{\theta} &=-[\boldsymbol{\omega}]_{ \times} \delta \boldsymbol{\theta} \end{array}
+$$
+其中的$(\mathbf{a}, \boldsymbol{\omega})$是IMU的读数,并且假设我们已经消除了重力和传感器偏置.
+
+这个系统通过状态向量和动态矩阵来表达:s
+$$
+\mathbf{x}=\left[\begin{array}{c}{\delta \mathbf{p}} \\ {\delta \mathbf{v}} \\ {\delta \boldsymbol{\theta}}\end{array}\right] \quad \mathbf{A}=\left[\begin{array}{ccc}{0} & {\mathbf{P}_{\mathbf{v}}} & {0} \\ {0} & {0} & {\mathbf{V}_{\boldsymbol{\theta}}} \\ {0} & {0} & {\Theta_{\boldsymbol{\theta}}}\end{array}\right]
+$$
+
+其中:
+
+$$
+\begin{array}{l}{\mathbf{P}_{\mathbf{v}}=\mathbf{I}} \\ {\mathbf{V}_{\theta}=-\mathbf{R}[\mathbf{a}]_{ \times}} \\ {\Theta_{\theta}=-[\omega]_{ \times}}\end{array}
+$$
+在一个时间间隔$\Delta t$内的积分后,我们得到$\mathbf{x}_{n+1}=e^{(\mathbf{A} \Delta t)} \cdot \mathbf{x}_{n}=\Phi \cdot \mathbf{x}_{n}$,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
