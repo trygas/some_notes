@@ -194,3 +194,59 @@ $$
 $$
 \begin{array}{l}{\mathbf{V}_{\mathbf{i}}=\sigma_{\tilde{\mathbf{a}}_{w}}^{2}} \\ {\Theta_{\mathbf{i}}=\sigma_{\hat{\omega}_{w}}^{2}} \\ {\mathbf{A}_{\mathbf{i}}=\sigma_{\mathbf{a}_{w}}^{2} \Delta t \mathbf{I}} \\ {\mathbf{\Omega}_{\mathbf{i}}=\sigma_{\omega_{w}}^{2} \Delta t \mathbf{I}}\end{array}
 $$
+
+### Appendix
+
+#### 积分方法
+
+在很多时候我们能够获得积分部分的闭环表达.我们现在考虑一阶线性微分方程.
+$$
+\dot{\mathbf{x}}(t)=\mathbf{A} \cdot \mathbf{x}(t)
+$$
+
+
+
+
+
+
+
+
+
+
+#### 随机噪声和扰动的积分
+
+我们的目标是为动态系统的随机变量的积分提供适当的方法.当然,我们不能对未知的随机值进行积分,但是为了传播不确定性,我们能够对他们的方差和协方差进行积分.
+
+考虑到以下的连续时间动态系统:
+$$
+\dot{\mathbf{x}}=f(\mathbf{x}, \mathbf{u}, \mathbf{w})
+$$
+其中$\mathbf{x}$是状态向量,$\mathbf{u}$是控制信号向量,包含了噪声$\tilde{\mathbf{u}}$,所以控制信号的测量值为$\mathbf{u}_{m}=\mathbf{u}+\tilde{\mathbf{u}}$,$\mathbf{w}$是随机扰动向量.噪声和扰动都假设为高斯过程,
+$$
+\tilde{\mathbf{u}} \sim \mathcal{N}\left\{0, \mathbf{U}^{c}\right\} \quad, \quad \mathbf{w}^{c} \sim \mathcal{N}\left\{0, \mathbf{W}^{c}\right\}
+$$
+上标c代表是连续时间的不确定性,这就是我们想要积分的.
+
+##### 噪声信号
+
+在离散化后,控制信号被在$n \Delta t$被取样,$\mathbf{u}_{m, n} \triangleq \mathbf{u}_{m}(n \Delta t)=\mathbf{u}(n \Delta t)+\tilde{\mathbf{u}}(n \Delta t)$,测量值很显然在积分过程的时候会被认为是常数,$\mathbf{u}_{m}(t)=\mathbf{u}_{m, n}$,因此,噪声也可以被看成是常值
+$$
+\tilde{\mathbf{u}}(t)=\tilde{\mathbf{u}}(n \Delta t)=\tilde{\mathbf{u}}_{n}, \quad n \Delta t<t<(n+1) \Delta t
+$$
+
+##### 随机扰动
+
+两种随机过程的积分是不一样的,随机扰动不能被采样.
+
+上面的连续时间误差状态公式可以被线性化为
+$$
+\dot{\delta \mathbf{x}}=\mathbf{A} \delta \mathbf{x}+\mathbf{B} \tilde{\mathbf{u}}+\mathbf{C} \mathbf{w}
+$$
+其中,
+$$
+\mathbf{A} \triangleq\left.\frac{\partial f}{\partial \delta \mathbf{x}}\right|_{\mathbf{x}, \mathbf{u}_{m}}, \quad \mathbf{B} \triangleq\left.\frac{\partial f}{\partial \tilde{\mathbf{u}}}\right|_{\mathbf{x}, \mathbf{u}_{m}}, \quad \mathbf{C} \triangleq\left.\frac{\partial f}{\partial \mathbf{w}}\right|_{\mathbf{x}, \mathbf{u}_{m}}
+$$
+在$\Delta t$的时间上进行积分,
+$$
+\begin{array} \delta \mathbf{x}_{n+1} &=\delta \mathbf{x}_{n}+\int_{n \Delta t}^{(n+1) \Delta t}\left(\mathbf{A} \delta \mathbf{x}(\tau)+\mathbf{B} \tilde{\mathbf{u}}(\tau)+\mathbf{C} \mathbf{w}^{c}(\tau)\right) d \tau \\ &=\delta \mathbf{x}_{n}+\int_{n \Delta t}^{(n+1) \Delta t} \mathbf{A} \delta \mathbf{x}(\tau) d \tau+\int_{n \Delta t}^{(n+1) \Delta t} \mathbf{B} \tilde{\mathbf{u}}(\tau) d \tau+\int_{n \Delta t}^{(n+1) \Delta t} \mathbf{C} \mathbf{w}^{c}(\tau) d \tau \end{array}
+$$
