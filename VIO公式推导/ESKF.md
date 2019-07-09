@@ -262,10 +262,12 @@ $$
 \mathbf{A}^{k>1}=\left[\begin{array}{ccc}{0} & {0} & {\mathbf{P}_{v} \mathbf{V}_{\boldsymbol{\theta}} \Theta_{\boldsymbol{\theta}}^{k-2}} \\ {0} & {0} & {\mathbf{V}_{\boldsymbol{\theta}} \Theta_{\boldsymbol{\theta}}^{k-1}} \\ {0} & {0} & {\Theta_{\boldsymbol{\theta}}^{k}}\end{array}\right]
 $$
 
-我们可以看到这个A的k次方有固定部分和
+我们可以看到这个A的k次方有固定部分和一个$\Theta_{\theta}$的连续乘积.
 
-
-
+将$\mathbf{A}^k$代入上面的$\Phi$中,我们能得到以下公式:
+$$
+\Phi=\left[\begin{array}{ccc}{\mathbf{I}} & {\Phi_{\mathbf{p v}}} & {\Phi_{\mathbf{p} \boldsymbol{\theta}}} \\ {0} & {\mathbf{I}} & {\Phi_{\mathbf{v} \boldsymbol{\theta}}} \\ {0} & {0} & {\Phi_{\boldsymbol{\theta} \boldsymbol{\theta}}}\end{array}\right]
+$$
 
 
 
