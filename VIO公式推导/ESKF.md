@@ -269,14 +269,41 @@ $$
 \Phi=\left[\begin{array}{ccc}{\mathbf{I}} & {\Phi_{\mathbf{p v}}} & {\Phi_{\mathbf{p} \boldsymbol{\theta}}} \\ {0} & {\mathbf{I}} & {\Phi_{\mathbf{v} \boldsymbol{\theta}}} \\ {0} & {0} & {\Phi_{\boldsymbol{\theta} \boldsymbol{\theta}}}\end{array}\right]
 $$
 
+###### 前两个对角线元素
 
+这个矩阵是一个3×3的矩阵,在对角线左下角为0,前连个对角线元素为$\mathbf{I}$,这是因为在公式累加的时候$\mathbf{A}^k$对角线前两个元素都没有值.
 
+###### 第三个对角线元素
 
+第三个对角线元素是$\Phi_{\boldsymbol{\theta} \boldsymbol{\theta}}$,这个值从上面我们可以看到就相当于$e^{\Phi\Delta t}$,所以这个值的闭式解如下
+$$
+\Phi_{\boldsymbol{\theta} \boldsymbol{\theta}}=\sum_{k=0}^{\infty} \frac{1}{k !} \Theta_{\boldsymbol{\theta}}^{k} \Delta t^{k}=\sum_{k=0}^{\infty} \frac{1}{k !}[-\boldsymbol{\omega}]_{ \times}^{k} \Delta t^{k}
+$$
 
+可以看出,这个公式和我们上面提到的公式差不多
+$$
+\Phi_{\boldsymbol{\theta} \boldsymbol{\theta}}=\mathbf{R}\{\boldsymbol{\omega} \Delta t\}^{\top}
+$$
 
+###### 位置速度项
 
+可以看到,这一项只有A的时候才有值,所以
+$$
+\Phi_{\mathrm{pv}}=\mathbf{P}_{\mathrm{v}} \Delta t=\mathbf{I} \Delta t
+$$
 
+###### 速度角度项
 
+现在我们来观察$\Phi_{\mathbf{v}, \boldsymbol{\theta}}$ 这一项
+$$
+\begin{array}{c}{\Phi_{\mathbf{v} \boldsymbol{\theta}}=\mathbf{V}_{\boldsymbol{\theta}} \Delta t+\frac{1}{2} \mathbf{V}_{\boldsymbol{\theta}} \Theta_{\boldsymbol{\theta}} \Delta t^{2}+\frac{1}{3 !} \mathbf{V}_{\boldsymbol{\theta}} \Theta_{\boldsymbol{\theta}}^{2} \Delta t^{3}+\cdots} \\ {\Phi_{\mathbf{v} \boldsymbol{\theta}}=\Delta t \mathbf{V}_{\boldsymbol{\theta}}\left(\mathbf{I}+\frac{1}{2} \Theta_{\boldsymbol{\theta}} \Delta t+\frac{1}{3 !} \Theta_{\boldsymbol{\theta}}^{2} \Delta t^{2}+\cdots\right)}\end{array}
+$$
+
+$$
+\Phi_{\mathbf{v} \boldsymbol{\theta}}=\Delta t \mathbf{V}_{\boldsymbol{\theta}}\left(\mathbf{I}+\sum_{k \geq 1} \frac{\left(\Theta_{\boldsymbol{\theta}} \Delta t\right)^{k}}{(k+1) !}\right)
+$$
+
+在这个时候,我们有两种选择,一种是把在$\mathbf{I}$后面的项全部忽略,然后我们就获得了$\Phi_{\mathrm{v} \theta}=\mathbf{V}_{\theta} \Delta t$,但是这样我们就不能获得一个闭式解.
 
 
 
