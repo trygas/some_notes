@@ -303,7 +303,19 @@ $$
 \Phi_{\mathbf{v} \boldsymbol{\theta}}=\Delta t \mathbf{V}_{\boldsymbol{\theta}}\left(\mathbf{I}+\sum_{k \geq 1} \frac{\left(\Theta_{\boldsymbol{\theta}} \Delta t\right)^{k}}{(k+1) !}\right)
 $$
 
-在这个时候,我们有两种选择,一种是把在$\mathbf{I}$后面的项全部忽略,然后我们就获得了$\Phi_{\mathrm{v} \theta}=\mathbf{V}_{\theta} \Delta t$,但是这样我们就不能获得一个闭式解.
+在这个时候,我们有两种选择,一种是把在$\mathbf{I}$后面的项全部忽略,然后我们就获得了$\Phi_{\mathrm{v} \theta}=\mathbf{V}_{\theta} \Delta t$,但是这样我们就不能获得一个闭式解.我们在下部分会使用这个解.
+
+还有一种选择就是我们将$\Phi_{\mathbf{v}\mathbf{\theta}}$写成如下形式
+$$
+\Phi_{\mathbf{v} \boldsymbol{\theta}}=\mathbf{V}_{\boldsymbol{\theta}} \Sigma_{1}
+$$
+其中
+$$
+\Sigma_{1}=\mathbf{I} \Delta t+\frac{1}{2} \Theta_{\boldsymbol{\theta}} \Delta t^{2}+\frac{1}{3 !} \Theta_{\boldsymbol{\theta}}^{2} \Delta t^{3}+\cdots
+$$
+
+
+
 
 
 
