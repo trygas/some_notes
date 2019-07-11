@@ -359,6 +359,12 @@ $$
 $$
 \Sigma_{2}=\frac{1}{2} \mathbf{I} \Delta t^{2}+\frac{1}{3 !} \Theta_{\boldsymbol{\theta}} \Delta t^{3}+\frac{1}{4 !} \Theta_{\boldsymbol{\theta}}^{2} \Delta t^{4}+\cdots
 $$
+同样,我们看到$\Sigma_2$和$\Sigma_1$一样有以下两个问题:
+
+
+
+
+
 我们和上面处理$\Sigma_1$一样的方法处理$\Sigma_2$,得到
 $$
 \Sigma_{2}=\frac{1}{2} \mathbf{I} \Delta t^{2}-\frac{1}{\|\boldsymbol{\omega}\|^{2}}\left(\mathbf{R}\{\boldsymbol{\omega} \Delta t\}^{\top}-\mathbf{I}-\Theta_{\boldsymbol{\theta}} \Delta t-\frac{1}{2} \Theta_{\boldsymbol{\theta}}^{2} \Delta t^{2}\right)
