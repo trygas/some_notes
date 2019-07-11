@@ -314,6 +314,62 @@ $$
 \Sigma_{1}=\mathbf{I} \Delta t+\frac{1}{2} \Theta_{\boldsymbol{\theta}} \Delta t^{2}+\frac{1}{3 !} \Theta_{\boldsymbol{\theta}}^{2} \Delta t^{3}+\cdots
 $$
 
+这个$\Sigma_{1}$看起来和我们上面写的$\Phi_{\theta\theta}$有点像,但是有两点不同
+
+- 第一点是每一项之前的系数不同,每一项都少一个$\Theta_{\boldsymbol{\theta}}$.
+- 第二点是少了第一项的$\mathbf{I}$.
+
+为了将$\Sigma_{1}$表示成我们熟悉的样子,我们有两个方法
+
+- 对于第一点,我们可以使用如下公式
+
+$$
+\Theta_{\boldsymbol{\theta}}=\frac{[\boldsymbol{\omega}]_{ \times}^{3}}{\|\boldsymbol{\omega}\|^{2}}=\frac{-\Theta_{\boldsymbol{\theta}}^{3}}{\|\boldsymbol{\omega}\|^{2}}
+$$
+
+将这个公式代入进去,那么$\Sigma_{1}$就变成了
+$$
+\Sigma_{1}=\mathbf{I} \Delta t-\frac{\Theta_{\boldsymbol{\theta}}}{\|\boldsymbol{\omega}\|^{2}}\left(\frac{1}{2} \Theta_{\boldsymbol{\theta}}^{2} \Delta t^{2}+\frac{1}{3 !} \Theta_{\boldsymbol{\theta}}^{3} \Delta t^{3}+\ldots\right)
+$$
+
+并且如果$\omega=0$,这个式子还能化简成$\Sigma_{1}=\mathbf{I} \Delta t$.
+
+- 现在来解决第二个问题,公式如下
+
+$$
+\Sigma_{1}=\mathbf{I} \Delta t-\frac{\Theta_{\boldsymbol{\theta}}}{\|\boldsymbol{\omega}\|^{2}}\left(\mathbf{R}\{\boldsymbol{\omega} \Delta t\}^{\top}-\mathbf{I}-\Theta_{\boldsymbol{\theta}} \Delta t\right)
+$$
+
+因此,我们就得到了
+$$
+\Phi_{\mathrm{v} \theta}=\left\{\begin{array}{ll}{-\mathbf{R}[\mathbf{a}]_{ \times} \Delta t} & {\omega \rightarrow 0} \\ {-\mathbf{R}[\mathbf{a}]_{ \times}\left(\mathbf{I} \Delta t+\frac{[\omega]_{ \times}}{\|\omega\|^{2}}\left(\mathbf{R}\{\omega \Delta t\}^{\top}-\mathbf{I}+[\omega]_{ \times} \Delta t\right)\right)} & {\omega \neq 0}\end{array}\right.
+$$
+
+###### 位姿角度项
+
+最后一项,我们来计算$\Phi_{\mathbf{p}\boldsymbol{\theta}}$,这项的泰勒展开式为
+$$
+\Phi_{\mathbf{p} \theta}=\frac{1}{2} \mathbf{P}_{\mathbf{v}} \mathbf{V}_{\boldsymbol{\theta}} \Delta t^{2}+\frac{1}{3 !} \mathbf{P}_{\mathbf{v}} \mathbf{V}_{\boldsymbol{\theta}} \Theta_{\boldsymbol{\theta}} \Delta t^{3}+\frac{1}{4 !} \mathbf{P}_{\mathbf{v}} \mathbf{V}_{\boldsymbol{\theta}} \Theta_{\boldsymbol{\theta}}^{2} \Delta t^{4}+\cdots
+$$
+化简为:
+$$
+\Phi_{\mathbf{p} \boldsymbol{\theta}}=\mathbf{P}_{\mathbf{v}} \mathbf{V}_{\boldsymbol{\theta}} \Sigma_{2}
+$$
+其中,
+$$
+\Sigma_{2}=\frac{1}{2} \mathbf{I} \Delta t^{2}+\frac{1}{3 !} \Theta_{\boldsymbol{\theta}} \Delta t^{3}+\frac{1}{4 !} \Theta_{\boldsymbol{\theta}}^{2} \Delta t^{4}+\cdots
+$$
+我们和上面处理$\Sigma_1$一样的方法处理$\Sigma_2$,得到
+$$
+\Sigma_{2}=\frac{1}{2} \mathbf{I} \Delta t^{2}-\frac{1}{\|\boldsymbol{\omega}\|^{2}}\left(\mathbf{R}\{\boldsymbol{\omega} \Delta t\}^{\top}-\mathbf{I}-\Theta_{\boldsymbol{\theta}} \Delta t-\frac{1}{2} \Theta_{\boldsymbol{\theta}}^{2} \Delta t^{2}\right)
+$$
+
+
+
+
+
+
+
 
 
 
