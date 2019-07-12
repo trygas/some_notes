@@ -1,6 +1,6 @@
 [TOC]
 
-# ESKF
+## ESKF
 
 ### ESKF优点
 
@@ -453,14 +453,6 @@ $$
 $$
 当n=0时,$\Sigma_{0}=\mathbf{R}\{\omega \Delta t\}^{\top}$,当$\omega \rightarrow 0$时,$\Sigma_n = \frac{1}{n !} \mathbf{I} \Delta t^{n}$.
 
-
-
-
-
-
-
-
-
 #### 随机噪声和扰动的积分
 
 我们的目标是为动态系统的随机变量的积分提供适当的方法.当然,我们不能对未知的随机值进行积分,但是为了传播不确定性,我们能够对他们的方差和协方差进行积分.
@@ -499,3 +491,54 @@ $$
 \begin{array} {}\delta \mathbf{x}_{n+1} &=\delta \mathbf{x}_{n}+\int_{n \Delta t}^{(n+1) \Delta t}\left(\mathbf{A} \delta \mathbf{x}(\tau)+\mathbf{B} \tilde{\mathbf{u}}(\tau)+\mathbf{C} \mathbf{w}^{c}(\tau)\right) d \tau \\ &=\delta \mathbf{x}_{n}+\int_{n \Delta t}^{(n+1) \Delta t} \mathbf{A} \delta \mathbf{x}(\tau) d \tau+\int_{n \Delta t}^{(n+1) \Delta t} \mathbf{B} \tilde{\mathbf{u}}(\tau) d \tau+\int_{n \Delta t}^{(n+1) \Delta t} \mathbf{C} \mathbf{w}^{c}(\tau) d \tau \end{array}
 $$
 
+这三部分有三个非常不同的特质,如下所示
+
+- 从APP.积分方法来看运动方程的积分就是通过转移矩阵来积分
+
+$$
+\delta \mathbf{x}_{n}+\int_{n \Delta t}^{(n+1) \Delta t} \mathbf{A} \delta \mathbf{x}(\tau) d \tau=\Phi \cdot \delta \mathbf{x}_{n}
+$$
+
+其中$\Phi=e^{\mathbf{A} \Delta t}$.
+
+- 从上面的公式我们可以看出
+
+$$
+\int_{n \Delta t}^{(n+1) \Delta t} \mathbf{B} \tilde{\mathbf{u}}(\tau) d \tau=\mathbf{B} \Delta t \tilde{\mathbf{u}}_{n}
+$$
+
+这就意味着一旦测量噪声被采样,这个积分就是确定的.
+
+- 从概率论知识我们可以知道$\Delta t$时间内的高斯白噪声积分会产生离散高斯白噪声脉冲$\mathbf{w}_{n}$,公式如下:
+
+$$
+\mathbf{w}_{n} \triangleq \int_{n \Delta t}^{(n+1) \Delta t} \mathbf{w}(\tau) d \tau \quad, \quad \mathbf{w}_{n} \sim \mathcal{N}\{0, \mathbf{W}\} \quad, \quad \text { with } \mathbf{W}=\mathbf{W}^{c} \Delta t
+$$
+
+和上面的测量噪声相比,我们可以发现扰动在积分阶段没有一个确定的值.
+
+因此,这个离散时间误差状态运动系统可以写为
+$$
+\delta \mathbf{x}_{n+1}=\mathbf{F}_{\mathbf{x}} \delta \mathbf{x}_{n}+\mathbf{F}_{\mathbf{u}} \tilde{\mathbf{u}}_{n}+\mathbf{F}_{\mathbf{w}} \mathbf{w}_{n}
+$$
+其中,转移矩阵,控制矩阵和扰动矩阵分别为
+$$
+\mathbf{F}_{\mathbf{x}}=\Phi=e^{\mathbf{A} \Delta t} \quad, \quad \mathbf{F}_{\mathbf{u}}=\mathbf{B} \Delta t \quad, \quad \mathbf{F}_{\mathbf{w}}=\mathbf{C}
+$$
+其中的噪声和扰动定义为
+$$
+\tilde{\mathbf{u}}_{n} \sim \mathcal{N}\{0, \mathbf{U}\} \quad, \quad \mathbf{w}_{n} \sim \mathcal{N}\{0, \mathbf{W}\}
+$$
+其中,
+$$
+\mathbf{U}=\mathbf{U}^{c} \quad, \quad \mathbf{W}=\mathbf{W}^{c} \Delta t
+$$
+上面的这些结果在表格中表示就是如下这张图.
+
+![](./Effect of integration on system and covariances matrices.png)
+
+在EKF的预测阶段就会使用如下公式传播误差状态的均值和协方差矩阵
+$$
+\begin{aligned} \hat{\delta \mathbf{x}}_{n+1} &=\mathbf{F}_{\mathbf{x}} \hat{\delta \mathbf{x}}_{n} \\ \mathbf{P}_{n+1} &=\mathbf{F}_{\mathbf{x}} \mathbf{P}_{n} \mathbf{F}_{\mathbf{x}}^{\top}+\mathbf{F}_{\mathbf{u}} \mathbf{U F}_{\mathbf{u}}^{\top}+\mathbf{F}_{\mathbf{w}} \mathbf{W} \mathbf{F}_{\mathbf{w}}^{\top} \\ &=e^{\mathbf{A} \Delta t} \mathbf{P}_{n}\left(e^{\mathbf{A} \Delta t}\right)^{\top}+\Delta t^{2} \mathbf{B} \mathbf{U}^{c} \mathbf{B}^{\top}+\Delta t \mathbf{C} \mathbf{W}^{c} \mathbf{C}^{\top} \end{aligned}
+$$
+在这里我们可以看出在积分阶段$\Delta t$的不同作用,
