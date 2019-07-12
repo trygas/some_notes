@@ -188,7 +188,7 @@ $$
 
 标称状态部分通常都是确定的,而误差部分的积分通常都要加上随机脉冲,公式如下
 $$
-\begin{array} \delta \mathbf{p} & \leftarrow \delta \mathbf{p}+\delta \mathbf{v} \Delta t \\ \delta \mathbf{v} & \leftarrow \delta \mathbf{v}+\left(-\mathbf{R}\left[\mathbf{a}_{m}-\mathbf{a}_{b}\right]_{ \times} \delta \boldsymbol{\theta}-\mathbf{R} \delta \mathbf{a}_{b}+\delta \mathbf{g}\right) \Delta t+\mathbf{v}_{\mathbf{i}} \\ \delta \boldsymbol{\theta} & \leftarrow \mathbf{R}^{\top}\left\{\left(\boldsymbol{\omega}_{m}-\boldsymbol{\omega}_{b}\right) \Delta t\right\} \delta \boldsymbol{\theta}-\delta \boldsymbol{\omega}_{b} \Delta t+\boldsymbol{\theta}_{\mathbf{i}} \\ \delta \mathbf{a}_{b} & \leftarrow \delta \mathbf{a}_{b}+\mathbf{a}_{\mathbf{i}} \\ \delta \boldsymbol{\omega}_{b} & \leftarrow \delta \boldsymbol{\omega}_{b}+\boldsymbol{\omega}_{\mathbf{i}} \\ \delta \mathbf{g} & \leftarrow \delta \mathbf{g} \end{array}
+\begin{array} {}\delta \mathbf{p} & \leftarrow \delta \mathbf{p}+\delta \mathbf{v} \Delta t \\ \delta \mathbf{v} & \leftarrow \delta \mathbf{v}+\left(-\mathbf{R}\left[\mathbf{a}_{m}-\mathbf{a}_{b}\right]_{ \times} \delta \boldsymbol{\theta}-\mathbf{R} \delta \mathbf{a}_{b}+\delta \mathbf{g}\right) \Delta t+\mathbf{v}_{\mathbf{i}} \\ \delta \boldsymbol{\theta} & \leftarrow \mathbf{R}^{\top}\left\{\left(\boldsymbol{\omega}_{m}-\boldsymbol{\omega}_{b}\right) \Delta t\right\} \delta \boldsymbol{\theta}-\delta \boldsymbol{\omega}_{b} \Delta t+\boldsymbol{\theta}_{\mathbf{i}} \\ \delta \mathbf{a}_{b} & \leftarrow \delta \mathbf{a}_{b}+\mathbf{a}_{\mathbf{i}} \\ \delta \boldsymbol{\omega}_{b} & \leftarrow \delta \boldsymbol{\omega}_{b}+\boldsymbol{\omega}_{\mathbf{i}} \\ \delta \mathbf{g} & \leftarrow \delta \mathbf{g} \end{array}
 $$
 在这里,$\mathbf{v}_{\mathbf{i}}, \boldsymbol{\theta}_{\mathbf{i}}, \mathbf{a}_{\mathbf{i}}$ 和$\omega_{\mathbf{i}}$都是随机噪声,建模为高斯白噪声.均值为0,协方差矩阵通过对$\mathbf{a}_{n}, \boldsymbol{\omega}_{n}, \mathbf{a}_{w}$ 和 $\boldsymbol{\omega}_{w}$的协方差矩阵在时间长度$\Delta t$进行积分获得
 $$
@@ -361,20 +361,78 @@ $$
 $$
 同样,我们看到$\Sigma_2$和$\Sigma_1$一样有以下两个问题:
 
+- 每一项都少一个$\Theta_{\theta}$的平方
+- 头两项没有了
 
-
-
-
-我们和上面处理$\Sigma_1$一样的方法处理$\Sigma_2$,得到
+然后我们使用上面一样的方法对第一个问题进行处理:
+$$
+\Sigma_{2}=\frac{1}{2} \mathbf{I} \Delta t^{2}-\frac{1}{\|\boldsymbol{\omega}\|^{2}}\left(\frac{1}{3 !} \Theta_{\boldsymbol{\theta}}^{3} \Delta t^{3}+\frac{1}{4 !} \Theta_{\boldsymbol{\theta}}^{4} \Delta t^{4}+\cdots\right)
+$$
+然后,我们和上面处理$\Sigma_1$第二个问题一样的方法处理$\Sigma_2$,得到
 $$
 \Sigma_{2}=\frac{1}{2} \mathbf{I} \Delta t^{2}-\frac{1}{\|\boldsymbol{\omega}\|^{2}}\left(\mathbf{R}\{\boldsymbol{\omega} \Delta t\}^{\top}-\mathbf{I}-\Theta_{\boldsymbol{\theta}} \Delta t-\frac{1}{2} \Theta_{\boldsymbol{\theta}}^{2} \Delta t^{2}\right)
 $$
+最后结果是:
+$$
+\Phi_{\mathrm{p} \theta}=\left\{\begin{array}{ll}{-\mathbf{R}[\mathbf{a}]_{ \times} \frac{\Delta t^{2}}{2}} & {\quad \omega \rightarrow 0} \\ {-\mathbf{R}[\mathbf{a}]_{ \times}\left(\frac{1}{2} \mathbf{I} \Delta t^{2}-\frac{1}{\|\omega\|^{2}}\left(\mathbf{R}\{\omega \Delta t\}^{\top}-\sum_{k=0}^{2} \frac{\left(-[\omega]_{ \times} \Delta t\right)^{k}}{k !}\right)\right)} & {\omega \neq 0}\end{array}\right.
+$$
 
+##### 全IMU例子
 
+为了给出从简化的IMU示例给出一般化的方法,我们需要考虑到更多信息.
 
+我们现在来看下全IMU信息的例子,公式(9)可以被简化为
+$$
+\dot{\delta \mathbf{x}}=\mathbf{A} \delta \mathbf{x}+\mathbf{B} \mathbf{w}
+$$
+这个离散时间的积分需要转移矩阵,如下所示
+$$
+\Phi=\sum_{k=0}^{\infty} \frac{1}{k !} \mathbf{A}^{k} \Delta t^{k}=\mathbf{I}+\mathbf{A} \Delta t+\frac{1}{2} \mathbf{A}^{2} \Delta t^{2}+\ldots
+$$
+这个运动矩阵是分块且稀疏的,并且中间的块可以从原始等式(9)来决定
+$$
+\mathbf{A}=\left[\begin{array}{cccccc}{0} & {\mathbf{P}_{\mathbf{v}}} & {0} & {0} & {0} & {0} \\ {0} & {0} & {\mathbf{V}_{\boldsymbol{\theta}}} & {\mathbf{V}_{\mathbf{a}}} & {0} & {\mathbf{V}_{\mathbf{g}}} \\ {0} & {0} & {\Theta_{\boldsymbol{\theta}}} & {0} & {\Theta_{\omega}} & {0} \\ {0} & {0} & {0} & {0} & {0} & {0} \\ {0} & {0} & {0} & {0} & {0} & {0} \\ {0} & {0} & {0} & {0} & {0} & {0}\end{array}\right]
+$$
 
+同样的,我们需要计算$\mathbf{A}$的平方,三次方,四次方,如下所示
+$$
+\mathbf{A}^{2}=\left[\begin{array}{cccccc}{0} & {0} & {\mathbf{P}_{\mathbf{v}} \mathbf{V}_{\boldsymbol{\theta}}} & {\mathbf{P}_{\mathbf{v}} \mathbf{V}_{\mathbf{a}}} & {0} & {\mathbf{P}_{\mathbf{v}} \mathbf{V}_{\mathbf{g}}} \\ {0} & {0} & {\mathbf{V}_{\boldsymbol{\theta}} \Theta_{\boldsymbol{\theta}}} & {0} & {\mathbf{V}_{\boldsymbol{\theta}} \Theta_{\omega}} & {0} \\ {0} & {0} & {\Theta_{\boldsymbol{\theta}}^{2}} & {0} & {\Theta_{\boldsymbol{\theta}} \Theta_{\boldsymbol{\omega}}} & {0} \\ {0} & {0} & {0} & {0} & {0} & {0} \\ {0} & {0} & {0} & {0} & {0} & {0} \\ {0} & {0} & {0} & {0} & {0} & {0}\end{array}\right]
+$$
 
+$$
+\mathbf{A}^{3}=\left[\begin{array}{cccccc}{0} & {0} & {\mathbf{P}_{\mathbf{v}} \mathbf{V}_{\boldsymbol{\theta}} \Theta_{\boldsymbol{\theta}}} & {0} & {\mathbf{P}_{\mathbf{v}} \mathbf{V}_{\boldsymbol{\theta}} \Theta_{\omega}} & {0} \\ {0} & {0} & {\mathbf{V}_{\boldsymbol{\theta}} \Theta_{\boldsymbol{\theta}}^{2}} & {0} & {\mathbf{V}_{\boldsymbol{\theta}} \Theta_{\boldsymbol{\theta}} \Theta_{\boldsymbol{\omega}}} & {0} \\ {0} & {0} & {\Theta_{\boldsymbol{\theta}}^{3}} & {0} & {\Theta_{\boldsymbol{\theta}}^{2} \Theta_{\boldsymbol{\omega}}} & {0} \\ {0} & {0} & {0} & {0} & {0} & {0} \\ {0} & {0} & {0} & {0} & {0} & {0} \\ {0} & {0} & {0} & {0} & {0} & {0}\end{array}\right]
+$$
 
+$$
+\mathbf{A}^{4}=\left[\begin{array}{cccccc}{0} & {0} & {\mathbf{P}_{\mathbf{v}} \mathbf{V}_{\boldsymbol{\theta}} \Theta_{\boldsymbol{\theta}}^{2}} & {0} & {\mathbf{P}_{\mathbf{v}} \mathbf{V}_{\boldsymbol{\theta}} \Theta_{\boldsymbol{\theta}} \Theta_{\boldsymbol{\omega}}} & {0} \\ {0} & {0} & {\mathbf{V}_{\boldsymbol{\theta}} \Theta_{\boldsymbol{\theta}}^{3}} & {0} & {\mathbf{V}_{\boldsymbol{\theta}} \Theta_{\boldsymbol{\theta}}^{2} \Theta_{\boldsymbol{\omega}}} & {0} \\ {0} & {0} & {\Theta_{\boldsymbol{\theta}}^{3}} & {0} & {\Theta_{\boldsymbol{\theta}}^{3} \Theta_{\boldsymbol{\omega}}} & {0} \\ {0} & {0} & {0} & {0} & {0} & {0} \\ {0} & {0} & {0} & {0} & {0} & {0} \\ {0} & {0} & {0} & {0} & {0} & {0}\end{array}\right]
+$$
+
+$\mathbf{A}$的次方的性质有以下这个几点
+
+- $\mathbf{A}$的稀疏性在三次方后就稳定了.
+- 左上角的3×3矩阵就是简化版的IMU.
+- 我们引入的第五列的对象可以用上面的方法去简化.
+
+和上面一样,我们感兴趣的是找到一个转移矩阵$\Phi$.我们首先回想到之前我们写过的$\Sigma_{1}$ 和 $\Sigma_{2}$.
+
+- 下标表示缺少的$\Theta_{\boldsymbol{\theta}}$的次方数
+- 下标表示缺少的前几项
+
+然后我们就能获得$\Sigma$的一般表达
+$$
+\Sigma_{n}(\mathbf{X}, y) \triangleq \sum_{k=n}^{\infty} \frac{1}{k !} \mathbf{X}^{k-n} y^{k}=\sum_{k=0}^{\infty} \frac{1}{(k+n) !} \mathbf{X}^{k} y^{k+n}=y^{n} \sum_{k=0}^{\infty} \frac{1}{(k+n) !} \mathbf{X}^{k} y^{k}
+$$
+在这里面的$\mathbf{X}$表示的是上面的缺少的次方矩阵,如果写成上面的$\Sigma$就是如下表示
+$$
+\Sigma_{n}=\Sigma_{n}\left(\Theta_{\boldsymbol{\theta}}, \Delta t\right)
+$$
+并且$\Sigma_{0}=\mathbf{R}\{\omega \Delta t\}^{\top}$.
+
+现在我们可以写出转移矩阵
+$$
+\Phi=\left[\begin{array}{cccccc}{\mathbf{I}} & {\mathbf{P}_{\mathbf{v}} \Delta t} & {\mathbf{P}_{\mathbf{V}} \mathbf{V}_{\boldsymbol{\theta}} \Sigma_{2}} & {\frac{1}{2} \mathbf{P}_{\mathbf{V}} \mathbf{V}_{\mathbf{a}} \Delta t^{2}} & {\mathbf{P}_{\mathbf{V}} \mathbf{V}_{\boldsymbol{\theta}} \Sigma_{3} \boldsymbol{\theta}_{\omega}} & {\frac{1}{2} \mathbf{P}_{\mathbf{V}} \mathbf{V}_{\mathbf{g}} \Delta t^{2}} \\ {0} & {\mathbf{I}} & {\mathbf{V}_{\boldsymbol{\theta}} \Sigma_{1}} & {\mathbf{V}_{\mathbf{a}} \Delta t} & {\mathbf{V}_{\boldsymbol{\theta}} \Sigma_{2} \boldsymbol{\theta}_{\omega}} & {\mathbf{V}_{\mathbf{g}} \Delta t} \\ {0} & {0} & {\Sigma_{0}} & {0} & {\Sigma_{1} \boldsymbol{\theta}_{\omega}} & {0} \\ {0} & {0} & {0} & {\mathbf{I}} & {0} & {0} \\ {0} & {0} & {0} & {0} & {\mathbf{I}} & {0} \\ {0} & {0} & {0} & {0} & {0} & {\mathbf{I}}\end{array}\right]
+$$
+现在我们的问题就是找到一个通用的$\Sigma$闭式解.
 
 
 
