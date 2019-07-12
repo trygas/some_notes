@@ -434,9 +434,24 @@ $$
 $$
 现在我们的问题就是找到一个通用的$\Sigma$闭式解.
 
+我们可以看一下之前的$\Sigma$,
+$$
+\begin{array} {}\Sigma_{0} &=\mathbf{R}\{\boldsymbol{\omega} \Delta t\}^{\top} \\ \Sigma_{1} &=\mathbf{I} \Delta t-\frac{\Theta_{\boldsymbol{\theta}}}{\|\boldsymbol{\omega}\|^{2}}\left(\mathbf{R}\{\boldsymbol{\omega} \Delta t\}^{\top}-\mathbf{I}-\Theta_{\boldsymbol{\theta}} \Delta t\right) \\ \Sigma_{2} &=\frac{1}{2} \mathbf{I} \Delta t^{2}-\frac{1}{\|\boldsymbol{\omega}\|^{2}}\left(\mathbf{R}\{\boldsymbol{\omega} \Delta t\}^{\top}-\mathbf{I}-\Theta_{\boldsymbol{\theta}} \Delta t-\frac{1}{2} \Theta_{\boldsymbol{\theta}}^{2} \Delta t^{2}\right) \end{array}
+$$
+现在为了算出$\Sigma_3$,我们就需要代入$\Theta_{\boldsymbol{\theta}}$两次,我们就能得到
+$$
+\Sigma_{3}=\frac{1}{3 !} \mathbf{I} \Delta t^{3}+\frac{\Theta_{\boldsymbol{\theta}}}{\|\boldsymbol{\omega}\|^{4}}\left(\frac{1}{4 !} \Theta_{\boldsymbol{\theta}}^{4} \Delta t^{4}+\frac{1}{5 !} \Theta_{\boldsymbol{\theta}}^{5} \Delta t^{5}+\ldots\right)
+$$
 
+$$
+\Sigma_{3}=\frac{1}{3 !} \mathbf{I} \Delta t^{3}+\frac{\Theta_{\boldsymbol{\theta}}}{\|\boldsymbol{\omega}\|^{4}}\left(\mathbf{R}\{\boldsymbol{\omega} \Delta t\}^{\top}-\mathbf{I}-\Theta_{\boldsymbol{\theta}} \Delta t-\frac{1}{2} \Theta_{\boldsymbol{\theta}}^{2} \Delta t^{2}-\frac{1}{3 !} \Theta_{\boldsymbol{\theta}}^{3} \Delta t^{3}\right)
+$$
 
-
+我们现在能得到$\Sigma$的一般表达形式
+$$
+\Sigma_{n}=\left\{\begin{array}{ll}{\frac{1}{n !} \mathbf{I} \Delta t^{n}-\frac{(-1)^{\frac{n+1}{2}}[\boldsymbol{\omega}]_{ \times}}{\|\boldsymbol{\omega}\|^{n+1}}\left(\mathbf{R}\{\boldsymbol{\omega} \Delta t\}^{\top}-\sum_{k=0}^{n} \frac{\left(-[\boldsymbol{\omega}]_{ \times} \Delta t\right)^{k}}{k !}\right)} & {n \text { odd }} \\ {\frac{1}{n !} \mathbf{I} \Delta t^{n}+\frac{(-1)^{\frac{n}{2}}}{\|\boldsymbol{\omega}\|^{n}}\left(\mathbf{R}\{\boldsymbol{\omega} \Delta t\}^{\top}-\sum_{k=0}^{n} \frac{\left(-[\boldsymbol{\omega}]_{ \times} \Delta t\right)^{k}}{k !}\right)} & {n \text { even }}\end{array}\right.
+$$
+当n=0时,$\Sigma_{0}=\mathbf{R}\{\omega \Delta t\}^{\top}$,当$\omega \rightarrow 0$时,$\Sigma_n = \frac{1}{n !} \mathbf{I} \Delta t^{n}$.
 
 
 
@@ -481,5 +496,6 @@ $$
 $$
 在$\Delta t$的时间上进行积分,
 $$
-\begin{array} \delta \mathbf{x}_{n+1} &=\delta \mathbf{x}_{n}+\int_{n \Delta t}^{(n+1) \Delta t}\left(\mathbf{A} \delta \mathbf{x}(\tau)+\mathbf{B} \tilde{\mathbf{u}}(\tau)+\mathbf{C} \mathbf{w}^{c}(\tau)\right) d \tau \\ &=\delta \mathbf{x}_{n}+\int_{n \Delta t}^{(n+1) \Delta t} \mathbf{A} \delta \mathbf{x}(\tau) d \tau+\int_{n \Delta t}^{(n+1) \Delta t} \mathbf{B} \tilde{\mathbf{u}}(\tau) d \tau+\int_{n \Delta t}^{(n+1) \Delta t} \mathbf{C} \mathbf{w}^{c}(\tau) d \tau \end{array}
+\begin{array} {}\delta \mathbf{x}_{n+1} &=\delta \mathbf{x}_{n}+\int_{n \Delta t}^{(n+1) \Delta t}\left(\mathbf{A} \delta \mathbf{x}(\tau)+\mathbf{B} \tilde{\mathbf{u}}(\tau)+\mathbf{C} \mathbf{w}^{c}(\tau)\right) d \tau \\ &=\delta \mathbf{x}_{n}+\int_{n \Delta t}^{(n+1) \Delta t} \mathbf{A} \delta \mathbf{x}(\tau) d \tau+\int_{n \Delta t}^{(n+1) \Delta t} \mathbf{B} \tilde{\mathbf{u}}(\tau) d \tau+\int_{n \Delta t}^{(n+1) \Delta t} \mathbf{C} \mathbf{w}^{c}(\tau) d \tau \end{array}
 $$
+
