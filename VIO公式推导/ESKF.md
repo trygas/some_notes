@@ -192,8 +192,34 @@ $$
 $$
 在这里,$\mathbf{v}_{\mathbf{i}}, \boldsymbol{\theta}_{\mathbf{i}}, \mathbf{a}_{\mathbf{i}}$ 和$\omega_{\mathbf{i}}$都是随机噪声,建模为高斯白噪声.均值为0,协方差矩阵通过对$\mathbf{a}_{n}, \boldsymbol{\omega}_{n}, \mathbf{a}_{w}$ 和 $\boldsymbol{\omega}_{w}$的协方差矩阵在时间长度$\Delta t$进行积分获得
 $$
-\begin{array}{l}{\mathbf{V}_{\mathbf{i}}=\sigma_{\tilde{\mathbf{a}}_{w}}^{2}} \\ {\Theta_{\mathbf{i}}=\sigma_{\hat{\omega}_{w}}^{2}} \\ {\mathbf{A}_{\mathbf{i}}=\sigma_{\mathbf{a}_{w}}^{2} \Delta t \mathbf{I}} \\ {\mathbf{\Omega}_{\mathbf{i}}=\sigma_{\omega_{w}}^{2} \Delta t \mathbf{I}}\end{array}
+\begin{array}{l}{\mathbf{V}_{\mathbf{i}}=\sigma_{\tilde{\mathbf{a}}_{w}}^{2}}\Delta t\mathbf{I} \\ {\Theta_{\mathbf{i}}=\sigma_{\hat{\omega}_{w}}^{2}} \Delta t\mathbf{I}\\ {\mathbf{A}_{\mathbf{i}}=\sigma_{\mathbf{a}_{w}}^{2} \Delta t^2 \mathbf{I}} \\ {\mathbf{\Omega}_{\mathbf{i}}=\sigma_{\omega_{w}}^{2} \Delta t^2 \mathbf{I}}\end{array}
 $$
+
+##### 误差状态雅克比和扰动矩阵
+
+如果
+$$
+\mathbf{x}=\left[\begin{array}{c}{\mathbf{p}} \\ {\mathbf{v}} \\ {\mathbf{q}} \\ {\mathbf{a}_{b}} \\ {\boldsymbol{\omega}_{b}} \\ {\mathbf{g}}\end{array}\right] \quad, \quad \delta \mathbf{x}=\left[\begin{array}{c}{\delta \mathbf{p}} \\ {\delta \mathbf{v}} \\ {\delta \boldsymbol{a}} \\ {\delta \mathbf{a}_{b}} \\ {\delta \boldsymbol{\omega}_{b}} \\ {\delta \mathbf{g}}\end{array}\right] \quad, \quad \mathbf{u}_{m}=\left[\begin{array}{c}{\mathbf{a}_{m}} \\ {\boldsymbol{\omega}_{m}}\end{array}\right] \quad, \quad \mathbf{i}=\left[\begin{array}{c}{\mathbf{v}_{\mathbf{i}}} \\ {\boldsymbol{\theta}_{\mathbf{i}}} \\ {\mathbf{a}_{\mathbf{i}}} \\ {\boldsymbol{\omega}_{\mathbf{i}}}\end{array}\right]
+$$
+设误差状态系统为
+$$
+\delta \mathbf{x} \leftarrow f\left(\mathbf{x}, \delta \mathbf{x}, \mathbf{u}_{m}, \mathbf{i}\right)=\mathbf{F}_{\mathbf{x}}\left(\mathbf{x}, \mathbf{u}_{m}\right) \cdot \delta \mathbf{x}+\mathbf{F}_{\mathbf{i}} \cdot \mathbf{i}
+$$
+ESKF预测方程为
+$$
+\begin{aligned} \hat{\delta \mathbf{x}} & \leftarrow \mathbf{F}_{\mathbf{x}}\left(\mathbf{x}, \mathbf{u}_{m}\right) \cdot \hat{\delta} \hat{\mathbf{x}} \\ \mathbf{P} & \leftarrow \mathbf{F}_{\mathbf{x}} \mathbf{P} \mathbf{F}_{\mathbf{x}}^{\top}+\mathbf{F}_{\mathbf{i}} \mathbf{Q}_{\mathbf{i}} \mathbf{F}_{\mathbf{i}}^{\top} \end{aligned}
+$$
+其中$\delta \mathbf{x} \sim \mathcal{N}\{\hat{\delta \mathbf{x}}, \mathbf{P}\}$,$\mathbf{F}_{\mathbf{x}}$ 和 $\mathbf{F}_{\mathbf{i}}$是$f()$的雅克比
+
+
+
+
+
+
+
+
+
+
 
 ### Appendix
 
@@ -467,14 +493,14 @@ $$
 $$
 上标c代表是连续时间的不确定性,这就是我们想要积分的.
 
-##### 噪声信号
+###### 噪声信号
 
 在离散化后,控制信号被在$n \Delta t$被取样,$\mathbf{u}_{m, n} \triangleq \mathbf{u}_{m}(n \Delta t)=\mathbf{u}(n \Delta t)+\tilde{\mathbf{u}}(n \Delta t)$,测量值很显然在积分过程的时候会被认为是常数,$\mathbf{u}_{m}(t)=\mathbf{u}_{m, n}$,因此,噪声也可以被看成是常值
 $$
 \tilde{\mathbf{u}}(t)=\tilde{\mathbf{u}}(n \Delta t)=\tilde{\mathbf{u}}_{n}, \quad n \Delta t<t<(n+1) \Delta t
 $$
 
-##### 随机扰动
+###### 随机扰动
 
 两种随机过程的积分是不一样的,随机扰动不能被采样.
 
@@ -540,4 +566,63 @@ $$
 $$
 \begin{aligned} \hat{\delta \mathbf{x}}_{n+1} &=\mathbf{F}_{\mathbf{x}} \hat{\delta \mathbf{x}}_{n} \\ \mathbf{P}_{n+1} &=\mathbf{F}_{\mathbf{x}} \mathbf{P}_{n} \mathbf{F}_{\mathbf{x}}^{\top}+\mathbf{F}_{\mathbf{u}} \mathbf{U F}_{\mathbf{u}}^{\top}+\mathbf{F}_{\mathbf{w}} \mathbf{W} \mathbf{F}_{\mathbf{w}}^{\top} \\ &=e^{\mathbf{A} \Delta t} \mathbf{P}_{n}\left(e^{\mathbf{A} \Delta t}\right)^{\top}+\Delta t^{2} \mathbf{B} \mathbf{U}^{c} \mathbf{B}^{\top}+\Delta t \mathbf{C} \mathbf{W}^{c} \mathbf{C}^{\top} \end{aligned}
 $$
-在这里我们可以看出在积分阶段$\Delta t$的不同作用,
+在这里我们可以看出在积分阶段$\Delta t$的不同作用
+
+- 运动方程的$\Delta t$是指数形式
+- 测量误差的$\Delta t$是二次方
+- 扰动误差的$\Delta t$是线性的
+
+##### 噪声和扰动脉冲
+
+我们在阅读代码或者文档的时候常常会发现作者使用的EKF预测方程比上面的要简便
+$$
+\mathbf{P}_{n+1}=\mathbf{F}_{\mathbf{x}} \mathbf{P}_{n} \mathbf{F}_{\mathbf{x}}^{\top}+\mathbf{Q}
+$$
+这个对应这如下通常离散时间运动系统
+$$
+\delta \mathbf{x}_{n+1}=\mathbf{F}_{\mathbf{x}} \delta \mathbf{x}_{n}+\mathbf{i}
+$$
+其中
+$$
+\mathrm{i} \sim \mathcal{N}\{0, \mathbf{Q}\}
+$$
+$\mathbf{i}$是一个高斯白噪声脉冲随机向量直接影响时间$t_{n+1}$的状态向量,这个矩阵$\mathbf{Q}$可以简单的看成脉冲协方差矩阵.从之前的公式我们看出
+$$
+\mathrm{Q}=\Delta t^{2} \mathrm{B} \mathrm{U}^{c} \mathrm{B}^{\top}+\Delta t \mathrm{C} \mathbf{W}^{c} \mathrm{C}^{\top}
+$$
+如果有这种脉冲没影响到所有的状态的情况,那么这个矩阵$\mathbf{Q}$的对角线不是满的,并且可能包含很多的0.如果是这种情况,上面的公式可以写为
+$$
+\delta \mathbf{x}_{n+1}=\mathbf{F}_{\mathbf{x}} \delta \mathbf{x}_{n}+\mathbf{F}_{\mathbf{i}} \mathbf{i}
+$$
+其中
+$$
+\mathbf{i} \sim \mathcal{N}\left\{0, \mathbf{Q}_{\mathbf{i}}\right\}
+$$
+这个矩阵$\mathbf{F}_{\mathbf{i}}$简单的将各个脉冲映射到它们所影响的状态向量.这个$\mathbf{Q}_{\mathbf{i}}$变小且对角线是满的.在这种ESKF模型下公式为
+$$
+\begin{array} \hat{\delta} \mathbf{x}_{n+1} &=\mathbf{F}_{\mathbf{x}} \hat{\delta}_{n} \\ \mathbf{P}_{n+1} &=\mathbf{F}_{\mathbf{x}} \mathbf{P}_{n} \mathbf{F}_{\mathbf{x}}^{\top}+\mathbf{F}_{\mathbf{i}} \mathbf{Q}_{\mathbf{i}} \mathbf{F}_{\mathbf{i}}^{\top} \end{array}
+$$
+显然,我们可以看到
+$$
+\mathbf{F}_{\mathbf{i}} \mathbf{Q}_{\mathbf{i}} \mathbf{F}_{\mathbf{i}}^{\top}={\mathbf{Q}}=\Delta t^{2} \mathbf{B} \mathbf{U}^{c} \mathbf{B}^{\top}+\Delta t \mathbf{C} \mathbf{W}^{c} \mathbf{C}^{\top}
+$$
+
+##### 全IMU例子
+
+我们现在来建立一个IMU的ESKF.其中标称状态$\mathbf{x}$,误差状态$\delta \mathbf{x}$,噪声控制信号$\mathbf{u}_{m}=\mathbf{u}+\tilde{\mathbf{u}}$还有一个扰动$\mathbf{W}$
+$$
+\mathbf{x}=\left[\begin{array}{c}{\mathbf{p}} \\ {\mathbf{v}} \\ {\mathbf{q}} \\ {\mathbf{a}_{b}} \\ {\boldsymbol{\omega}_{b}} \\ {\mathbf{g}}\end{array}\right] \quad, \quad \delta \mathbf{x}=\left[\begin{array}{c}{\delta \mathbf{p}} \\ {\delta \mathbf{v}} \\ {\delta \boldsymbol{a}_{b}} \\ {\delta \boldsymbol{\omega}_{b}} \\ {\delta \boldsymbol{g}} \\ {\delta \mathbf{g}}\end{array}\right] \quad, \quad \mathbf{u}_{m}=\left[\begin{array}{c}{\mathbf{a}_{m}} \\ {\boldsymbol{\omega}_{m}}\end{array}\right] \quad, \quad \tilde{\mathbf{u}}=\left[\begin{array}{c}{\tilde{\mathbf{a}}} \\ {\tilde{\boldsymbol{\omega}}}\end{array}\right] \quad, \quad \mathbf{w}=\left[\begin{array}{c}{\mathbf{a}_{w}} \\ {\boldsymbol{\omega}_{w}}\end{array}\right]
+$$
+
+$$
+\mathbf{A}=\left[\begin{array}{cccccc}{0} & {\mathbf{P}_{\mathbf{v}}} & {0} & {0} & {0} & {0} \\ {0} & {0} & {\mathbf{V}_{\boldsymbol{\theta}}} & {\mathbf{V}_{\mathbf{a}}} & {0} & {\mathbf{V}_{\mathbf{g}}} \\ {0} & {0} & {\mathbf{O}_{\boldsymbol{\theta}}} & {0} & {\Theta_{\boldsymbol{\omega}}} & {0} \\ {0} & {0} & {0} & {0} & {0} & {0} \\ {0} & {0} & {0} & {0} & {0} & {0} \\ {0} & {0} & {0} & {0} & {0} & {0}\end{array}\right] \quad, \quad \mathbf{B}=\left[\begin{array}{cc}{0} & {0} \\ {-\mathbf{R}} & {0} \\ {0} & {-\mathbf{I}} \\ {0} & {0} \\ {0} & {0} \\ {0} & {0}\end{array}\right] \quad, \quad \mathbf{C}=\left[\begin{array}{cc}{0} & {0} \\ {0} & {0} \\ {0} & {0} \\ {\mathbf{I}} & {0} \\ {0} & {\mathbf{I}} \\ {0} & {0}\end{array}\right]
+$$
+
+标准偏差如下
+$$
+\sigma_{\tilde{\mathbf{a}}}\left[m / s^{2}\right] \quad, \quad \sigma_{\tilde{\omega}}[r a d / s] \quad, \quad \sigma_{\mathbf{a}_{w}}\left[m / s^{2} \sqrt{s}\right] \quad, \quad \sigma_{\omega_{w}}[r a d / s \sqrt{s}]
+$$
+协方差矩阵为
+$$
+\mathbf{U}^{c}=\left[\begin{array}{cc}{\sigma_{\tilde{\mathbf{a}}}^{2} \mathbf{I}} & {0} \\ {0} & {\sigma_{\tilde{\omega}}^{2} \mathbf{I}}\end{array}\right] \quad, \quad \mathbf{W}^{c}=\left[\begin{array}{cc}{\sigma_{\mathbf{a}_{w}}^{2} \mathbf{I}} & {0} \\ {0} & {\sigma_{\boldsymbol{\omega}_{w}}^{2} \mathbf{I}}\end{array}\right]
+$$
