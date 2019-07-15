@@ -261,7 +261,111 @@ $$
 \\  & & & \frac{\partial\left(\mathbf{a}_{b}+\delta \mathbf{a}_{b}\right)}{\partial \delta \mathbf{a}_{b}} & & \\ & & & &  \frac{\partial\left(\boldsymbol{\omega}_{b}+\delta \boldsymbol{\omega}_{b}\right)}{\partial \delta \boldsymbol{\omega}_{b}} & \\ & & & &  &   \frac{\partial(\mathbf{g}+\delta \mathbf{g})}{\partial \delta \mathbf{g}}  \end{array}\right]
 $$
 
+除了4×3的四元数项$$
+\mathbf{Q}_{\delta \boldsymbol{\theta}}=\partial(\mathbf{q} \otimes \delta \mathbf{q}) / \partial \delta \boldsymbol{\theta}
+$$外,其它每一项都是3×3的块(例如$\frac{\partial(\mathbf{p}+\delta \mathbf{p})}{\partial \delta \mathbf{p}}=\mathbf{I}_{3}$)因此,我们有以下的形式
+$$
+\mathbf{X}_{\delta \mathbf{x}} \triangleq\left.\frac{\partial \mathbf{x}_{t}}{\partial \delta \mathbf{x}}\right|_{\mathbf{x}}=\left[\begin{array}{ccc}{\mathbf{I}_{6}} & {0} & {0} \\ {0} & {\mathbf{Q}_{\delta \boldsymbol{\theta}}} & {0} \\ {0} & {0} & {\mathbf{I}_{9}}\end{array}\right]
+$$
+使用链式法则,而且$\delta \mathbf{q} \underset{\delta \boldsymbol{\theta} \rightarrow 0}{\longrightarrow}\left[\begin{array}{c}{1} \\ {\frac{1}{2} \delta \boldsymbol{\theta}}\end{array}\right]$,这个四元数项$\mathbf{Q}_{\delta \boldsymbol{\theta}}$可以用以下公式推导
+$$
+\begin{aligned} \mathbf{Q}_{\delta \boldsymbol{\theta}} \triangleq\left.\frac{\partial(\mathbf{q} \otimes \delta \mathbf{q})}{\partial \delta \boldsymbol{\theta}}\right|_{\mathbf{q}} &=\left.\frac{\partial(\mathbf{q} \otimes \delta \mathbf{q})}{\partial \delta \mathbf{q}}\right|_{\mathbf{q}}\left.\frac{\partial \delta \mathbf{q}}{\partial \delta \boldsymbol{\theta}}\right|_{\hat{\delta} \boldsymbol{\theta}=0} \\ &=\left.\frac{\partial\left([\mathbf{q}]_{L} \delta \mathbf{q}\right)}{\partial \delta \mathbf{q}}\right|_{\mathbf{q}}\left.\frac{\partial\left[\begin{array}{c}{1} \\ {\frac{1}{2} \delta \boldsymbol{\theta}}\end{array}\right]}{\partial \delta \boldsymbol{\theta}}\right|_{\hat{\delta} \boldsymbol{\theta}=0} 
+\\&=[\mathbf{q} ]_{L} \frac{1}{2}\left[\begin{array}{lll}{0} & {0} & {0} \\ {1} & {0} & {0} \\ {0} & {1} & {0} \\ {0} & {0} & {1}\end{array}\right]
+\end{aligned}
+$$
+结果为
+$$
+\mathbf{Q}_{\delta \boldsymbol{\theta}}=\frac{1}{2}\left[\begin{array}{ccc}{-q_{x}} & {-q_{y}} & {-q_{z}} \\ {q_{w}} & {-q_{z}} & {q_{y}} \\ {q_{z}} & {q_{w}} & {-q_{x}} \\ {-q_{y}} & {q_{x}} & {q_{w}}\end{array}\right]
+$$
 
+#### 注入观测误差到标称状态
+
+在ESKF状态更新后,标称状态通过观测误差状态利用合适的组合进行更新
+$$
+\mathbf{x} \leftarrow \mathbf{x} \oplus \hat{\delta \mathbf{x}}
+$$
+在这里面有
+$$
+\begin{array}{l}{\mathbf{p} \leftarrow \mathbf{p}+\hat{\delta} \hat{\mathbf{p}}} \\ {\mathbf{v} \leftarrow \mathbf{v}+\hat{\delta \mathbf{v}}} \\ {\mathbf{q} \leftarrow \mathbf{q} \otimes \mathbf{q}\{\hat{\delta \boldsymbol{\theta}\}}}
+\\
+\begin{array}{r}{\mathbf{a}_{b} \leftarrow \mathbf{a}_{b}+\delta \hat{\mathbf{a}}_{b}} \\ {\omega_{b} \leftarrow \omega_{b}+\delta \hat{\boldsymbol{\omega}}_{b}} \\ {\mathbf{g} \leftarrow \mathbf{g}+\hat{\delta \mathbf{g}}}\end{array}
+\end{array}
+$$
+
+#### ESKF重置
+
+在注入误差到标称状态后,这个状态误差均值$\hat{\delta \mathbf{x}}$需要进行重置.
+
+如果我们将误差重置函数称为$g()$,可以写为以下形式
+$$
+\delta \mathbf{x} \leftarrow g(\delta \mathbf{x})=\delta \mathbf{x} \ominus \hat{\delta \mathbf{x}}
+$$
+重置操作为
+$$
+\begin{aligned} \hat{\delta \mathbf{x}} & \leftarrow 0 \\ \mathbf{P} & \leftarrow \mathbf{G} \mathbf{P} \mathbf{G}^{\top} \end{aligned}
+$$
+$\mathbf{G}$是雅克比矩阵
+$$
+\mathbf{G} \triangleq\left.\frac{\partial g}{\partial \delta \mathbf{x}}\right|_{\delta \mathbf{x}}
+$$
+和上面的雅克比计算一样,除了角度误差外,这个雅克比的对角块都是identity.$\partial \delta \boldsymbol{\theta}^{+} / \partial \delta \boldsymbol{\theta}=\mathbf{I}-\left[\frac{1}{2} \hat{\delta \boldsymbol{\theta}}\right]_{ \times}$,下一节给出推导
+$$
+\mathbf{G}=\left[\begin{array}{ccc}{\mathbf{I}_{6}} & {0} & {0} \\ {0} & {\mathbf{I}-\left[\frac{1}{2} \hat{\delta\boldsymbol{\theta}}\right]_×} & {0} \\ {0} & {0} & {\mathbf{I}_{9}}\end{array}\right]
+$$
+在很多例子中,误差项$\hat{\delta\boldsymbol{\theta}}$可以被忽略,算出一个雅克比矩阵$\mathbf{G}=\mathbf{I}_{18}$.
+
+###### 重置操作中旋转误差的雅克比矩阵
+
+我们想要获得相比以前的误差$\delta \boldsymbol{\theta}$和观测到的误差$\hat{\delta\theta}$的新的角度误差表达$\delta \boldsymbol{\theta}^{+}$,考虑到以下的情况
+
+- 角度真值不会在误差重置的时候改变,也就是$\mathbf{q}_{t}^{+}=\mathbf{q}_{t}$,展开后
+
+$$
+\mathbf{q}^{+} \otimes \delta \mathbf{q}^{+}=\mathbf{q} \otimes \delta \mathbf{q}
+$$
+
+- 观测到的误差均值注入到标称状态后
+
+$$
+\mathbf{q}^{+}=\mathbf{q} \otimes \hat{\delta \mathbf{q}}
+$$
+
+将上面两个公式组合起来后我们获得$\delta \mathbf{q}^{+}$的表达
+$$
+\delta \mathbf{q}^{+}=\left(\mathbf{q}^{+}\right)^{*} \otimes \mathbf{q} \otimes \delta \mathbf{q}=(\mathbf{q} \otimes \hat{\delta \mathbf{q}})^{*} \otimes \mathbf{q} \otimes \delta \mathbf{q}=\hat{\delta \mathbf{q}}^{*} \otimes \delta \mathbf{q}=\left[\delta \hat{\mathbf{q}}^{*}\right]_{L} \cdot \delta \mathbf{q}
+$$
+考虑到$\hat{\delta \mathbf{q}}^{*} \approx\left[\begin{array}{c}{1} \\ {-\frac{1}{2} \hat{\delta} \boldsymbol{\theta}}\end{array}\right]$,上面的公式可以表示为
+$$
+\left[\begin{array}{c}{1} \\ {\frac{1}{2} \delta \boldsymbol{\theta}^{+}}\end{array}\right]=\left[\begin{array}{cc}{1} & {\frac{1}{2} \delta \boldsymbol{\theta}^{\top}} \\ {-\frac{1}{2} \hat{\delta} \boldsymbol{\theta}} &  \mathbf{I}-\left[\frac{1}{2} \hat{\delta} \hat{\boldsymbol{\theta}}\right]_{ \times}\end{array}\right] \cdot\left[\begin{array}{c}{1} \\ {\frac{1}{2} \delta \boldsymbol{\theta}}\end{array}\right]+\mathcal{O}\left(\|\delta \boldsymbol{\theta}\|^{2}\right)
+$$
+这就获得了一个尺度公式和一个向量公式
+$$
+\frac{1}{4} \delta \boldsymbol{\theta}^{\top} \delta \boldsymbol{\theta}=\mathcal{O}\left(\|\delta \boldsymbol{\theta}\|^{2}\right)
+$$
+
+$$
+\delta \boldsymbol{\theta}^{+}=-\hat{\delta} \hat{\boldsymbol{\theta}}+\left(\mathbf{I}-\left[\frac{1}{2} \hat{\delta} \boldsymbol{\theta}\right]_{ \times}\right) \delta \boldsymbol{\theta}+\mathcal{O}\left(\|\delta \boldsymbol{\theta}\|^{2}\right)
+$$
+
+第一个公式没什么用,主要是第二个公式,我们之前知道了$\hat{\delta \boldsymbol{\theta}}^{+}=0$,所以雅克比为
+$$
+\frac{\partial \delta \boldsymbol{\theta}^{+}}{\partial \delta \boldsymbol{\theta}}=\mathbf{I}-\left[\frac{1}{2} \hat{\delta \boldsymbol{\theta}}\right]_{ \times}
+$$
+
+### 使用全局角度误差的ESKF
+
+在这一章里,我们来探讨以下全局坐标系下的角度误差.
+
+角度误差$\delta \boldsymbol{\theta}$的全局定义如下表示
+$$
+\mathbf{q}_{t}=\delta \mathbf{q} \otimes \mathbf{q}=\mathbf{q}\{\delta \boldsymbol{\theta}\} \otimes \mathbf{q}
+$$
+
+#### 连续时间系统运动
+
+##### 真值和标称状态
+
+因为真值和标称状态并不涉及误差,所以它们的等式不会变化.
 
 
 
