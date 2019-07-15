@@ -209,7 +209,48 @@ ESKF预测方程为
 $$
 \begin{aligned} \hat{\delta \mathbf{x}} & \leftarrow \mathbf{F}_{\mathbf{x}}\left(\mathbf{x}, \mathbf{u}_{m}\right) \cdot \hat{\delta} \hat{\mathbf{x}} \\ \mathbf{P} & \leftarrow \mathbf{F}_{\mathbf{x}} \mathbf{P} \mathbf{F}_{\mathbf{x}}^{\top}+\mathbf{F}_{\mathbf{i}} \mathbf{Q}_{\mathbf{i}} \mathbf{F}_{\mathbf{i}}^{\top} \end{aligned}
 $$
-其中$\delta \mathbf{x} \sim \mathcal{N}\{\hat{\delta \mathbf{x}}, \mathbf{P}\}$,$\mathbf{F}_{\mathbf{x}}$ 和 $\mathbf{F}_{\mathbf{i}}$是$f()$的雅克比
+其中$\delta \mathbf{x} \sim \mathcal{N}\{\hat{\delta \mathbf{x}}, \mathbf{P}\}$,$\mathbf{F}_{\mathbf{x}}$ 和 $\mathbf{F}_{\mathbf{i}}$是$f()$对误差向量和扰动向量的雅克比,而$\mathbf{Q}_{\mathbf{i}}$是扰动脉冲的协方差矩阵.
+
+上面所写的雅克比和协方差矩阵如下所示
+$$
+\mathbf{F}_{\mathbf{x}}=\left.\frac{\partial f}{\partial \delta \mathbf{x}}\right|_{\mathbf{x}, \mathbf{u}_{m}}=\left[\begin{array}{cccccc}{\mathbf{I}} & {\mathbf{I} \Delta t} & {0} & {0} & {0} & {0} \\ {0} & {\mathbf{I}} & {-\mathbf{R}\left[\mathbf{a}_{m}-\mathbf{a}_{b}\right]_{ \times} \Delta t} & {-\mathbf{R} \Delta t} & {0} & {\mathbf{I} \Delta t} \\ {0} & {0} & {\mathbf{R}^{\top}\left\{\left(\boldsymbol{\omega}_{m}-\boldsymbol{\omega}_{b}\right) \Delta t\right\}} & {0} & {-\mathbf{I} \Delta t} & {0} \\ {0} & {0} & {0} & {\mathbf{I}} & {0} & {0} \\ {0} & {0} & {0} & {0} & {\mathbf{I}} & {0} \\ {0} & {0} & {0} & {0} & {0} & {\mathbf{I}}\end{array}\right]
+$$
+
+$$
+\mathbf{F}_{\mathbf{i}}=\left.\frac{\partial f}{\partial \mathbf{i}}\right|_{\mathbf{x}, \mathbf{u}_{m}}=\left[\begin{array}{cccc}{0} & {0} & {0} & {0} \\ {\mathbf{I}} & {0} & {0} & {0} \\ {0} & {\mathbf{I}} & {0} & {0} \\ {0} & {0} & {\mathbf{I}} & {0} \\ {0} & {0} & {0} & {\mathbf{I}} \\ {0} & {0} & {0} & {0}\end{array}\right] \quad, \quad \mathbf{Q}_{\mathbf{i}}=\left[\begin{array}{cccc}{\mathbf{V}_{\mathbf{i}}} & {0} & {0} & {0} \\ {0} & {\boldsymbol{\Theta}_{\mathbf{i}}} & {0} & {0} \\ {0} & {0} & {\mathbf{A}_{\mathbf{i}}} & {0} \\ {0} & {0} & {0} & {\Omega_{\mathbf{i}}}\end{array}\right]
+$$
+
+注意这个$\mathbf{F}_{\mathbf{x}}$是整个系统的转移矩阵.
+
+### IMU融合其他传感器信息
+
+如果在这个IMU系统中还有其他信息,那么我们需要纠正ESKF.在一个设计良好的系统中,我们需要让IMU误差可观测并且能够正确测量他们.在视觉加IMU系统中,有以下三个步骤
+
+- 通过滤波器校正观测误差状态
+- 将观测到的误差注入标称状态
+- 重置误差状态
+
+#### 通过滤波器校正观测误差状态
+
+假设我们有一个传感器传输依赖于状态的信息
+$$
+\mathbf{y}=h\left(\mathbf{x}_{t}\right)+v
+$$
+其中$h()$是系统状态的普通非线性方程,$v$是协方差为$\mathbf{V}$的高斯白噪声
+$$
+v \sim \mathcal{N}\{0, \mathbf{V}\}
+$$
+我们的滤波器是估计这个误差状态,因此这个滤波器校正公式为(P也可以用上面的P公式)
+$$
+\begin{array} \mathbf{K} &=\mathbf{P} \mathbf{H}^{\top}\left(\mathbf{H} \mathbf{P} \mathbf{H}^{\top}+\mathbf{V}\right)^{-1} \\ \hat{\delta \mathbf{x}} & \leftarrow \mathbf{K}\left(\mathbf{y}-h\left(\hat{\mathbf{x}}_{t}\right)\right) \\ \mathbf{P} & \leftarrow(\mathbf{I}-\mathbf{K} \mathbf{H}) \mathbf{P} \end{array}
+$$
+其中雅克比$\mathbf{H}$是$\delta \mathbf{x}$的,最终估计出来的最好的真值估计值为$\hat{\mathbf{x}}_{t}=\mathbf{x} \oplus \delta \hat{\mathbf{x}}$.如果这个误差状态是0的话(我们还没有观测它),我们有$\hat{\mathbf{x}}_{t}=\mathbf{x}$
+$$
+\mathbf{H} \equiv\left.\frac{\partial h}{\partial \delta \mathbf{x}}\right|_{\mathbf{x}}
+$$
+
+
+
 
 
 
