@@ -367,6 +367,123 @@ $$
 
 因为真值和标称状态并不涉及误差,所以它们的等式不会变化.
 
+##### 误差状态运动
+
+我们先写出误差状态运动公式,然后给出证明
+$$
+\begin{aligned} \dot{\delta \mathbf{p}} &=\delta \mathbf{v} \\ \dot{\delta \mathbf{v}} &=-\left[\mathbf{R}\left(\mathbf{a}_{m}-b \mathbf{a}_{b}\right)\right]_{ \times} \delta \boldsymbol{\theta}-\mathbf{R} \delta \mathbf{a}_{b}+\delta \mathbf{g}-\mathbf{R} \mathbf{a}_{n} \\ \dot{\delta \boldsymbol{\theta}} &=-\mathbf{R} \delta \boldsymbol{\omega}_{b}-\mathbf{R} \omega_{n} \\ \delta \dot{\mathbf{a}}_{b} &=\mathbf{a}_{w} \\ \delta \dot{\boldsymbol{\omega}}_{b} &=\boldsymbol{\omega}_{w} \\ \dot{\delta \mathbf{g}} &=0 \end{aligned}
+$$
+这里面我们只给出$\dot{\delta \mathbf{v}}$ 和 $\dot{\delta \boldsymbol{\theta}}$的证明
+
+###### 线性速度误差
+
+我们首先列出以下公式
+$$
+\mathbf{R}_{t}=\left(\mathbf{I}+[\delta \boldsymbol{\theta}]_{ \times}\right) \mathbf{R}+O\left(\|\delta \boldsymbol{\theta}\|^{2}\right)
+$$
+
+$$
+\dot{\mathbf{v}}=\mathbf{R} \mathbf{a}_{\mathcal{B}}+\mathbf{g}
+$$
+
+其中第一个公式是$\mathbf{R}_{t}$的一个小信号估计,其中使用了一个小的全局误差.而在第二个公式中$\mathbf{a}_{\mathcal{B}}$ 和 $\delta \mathbf{a}_{\mathcal{B}}$是body框架下的大信号加速度和小信号加速度.
+
+我们写出$\dot{\mathbf{v}}_{t}$的两种形式,其中高次项被忽略了
+$$
+\dot{\mathbf{v}}+\dot{\delta \mathbf{v}}=\dot{\mathbf{v}}_{t}=\left(\mathbf{I}+[\delta \boldsymbol{\theta}]_{ \times}\right) \mathbf{R}\left(\mathbf{a}_{\mathcal{B}}+\delta \mathbf{a}_{\mathcal{B}}\right)+\mathbf{g}+\delta \mathbf{g}
+$$
+
+$$
+\mathbf{R} \mathbf{a}_{\mathcal{B}}+\mathbf{g}+\dot{\delta \mathbf{v}}=\mathbf{R} \mathbf{a}_{\mathcal{B}}+\mathbf{R} \delta \mathbf{a}_{\mathcal{B}}+[\delta \boldsymbol{\theta}]_{ \times} \mathbf{R} \mathbf{a}_{\mathcal{B}}+[\delta \boldsymbol{\theta}]_{ \times} \mathbf{R} \delta \mathbf{a}_{\mathcal{B}}+\mathbf{g}+\delta \mathbf{g}
+$$
+
+然后结果为
+$$
+\dot {\delta \mathbf{v}}=\mathbf{R} \delta \mathbf{a}_{\mathcal{B}}+[\delta \boldsymbol{\theta}]_{ \times} \mathbf{R}\left(\mathbf{a}_{\mathcal{B}}+\delta \mathbf{a}_{\mathcal{B}}\right)+\delta \mathbf{g}
+$$
+
+约去二次小项后代入公式后,
+$$
+\dot{\delta \mathbf{v}}=-\left[\mathbf{R}\left(\mathbf{a}_{m}-\mathbf{a}_{b}\right)\right]_{ \times} \delta \boldsymbol{\theta}-\mathbf{R} \delta \mathbf{a}_{b}+\delta \mathbf{g}-\mathbf{R} \mathbf{a}_{n}
+$$
+
+###### 角度误差
+
+首先列出真值和标称状态方程
+$$
+\begin{array} {}\dot{\mathbf{q}}_{t} &=\frac{1}{2} \mathbf{q}_{t} \otimes \boldsymbol{\omega}_{t} \\ \dot{\mathbf{q}} &=\frac{1}{2} \mathbf{q} \otimes \boldsymbol{\omega} \end{array}
+$$
+然后记住我们使用的是全局坐标系下的角度误差,所以是左乘
+$$
+\mathbf{q}_{t}=\delta \mathbf{q} \otimes \mathbf{q}
+$$
+同样的,我们使用两种方法来计算$\dot{\mathbf{q}}_{t}$.
+$$
+\begin{array}\dot{(\delta \mathbf{q} \otimes \mathbf{q})} &=\frac{1}{2} \mathbf{q}_{t} \otimes \omega_{t} \\ \dot{\delta \mathbf{q}} \otimes \mathbf{q}+\delta \mathbf{q} \otimes \dot{\mathbf{q}}&=\frac{1}{2} \delta \mathbf{q} \otimes \mathbf{q} \otimes \omega_{t} \\ \dot{\delta \mathbf{q}} \otimes \mathbf{q}+\frac{1}{2} \delta \mathbf{q} \otimes \mathbf{q} \otimes \omega &=\end{array}
+$$
+定义${\omega}_{t}=\boldsymbol{\omega}+\delta \boldsymbol{\omega}$,上面的公式化为
+$$
+\dot{\delta \mathbf{q}} \otimes \mathbf{q}=\frac{1}{2} \delta \mathbf{q} \otimes \mathbf{q} \otimes \delta \boldsymbol{\omega}
+$$
+继续进行化简
+$$
+\begin{aligned} \dot{\delta \mathbf{q}} &=\frac{1}{2} \delta \mathbf{q} \otimes \mathbf{q} \otimes \delta \boldsymbol{\omega} \otimes \mathbf{q}^{*} \\ &=\frac{1}{2} \delta \mathbf{q} \otimes(\mathbf{R} \delta \boldsymbol{\omega}) \\ &=\frac{1}{2} \delta \mathbf{q} \otimes \delta \boldsymbol{\omega}_{G} \end{aligned}
+$$
+上面的化简利用了公式$\mathbf{q} \otimes \delta \boldsymbol{\omega} \otimes \mathbf{q}^{*} \equiv \mathbf{R} \delta \boldsymbol{\omega}$,然后得到$\delta \boldsymbol{\omega}_{G} \triangleq \mathbf{R} \delta \boldsymbol{\omega}$代表着世界坐标系的小信号角速度.然后,
+$$
+\begin{align}\left[\begin{array}{l}{0} \\ {\delta \boldsymbol{\theta}}\end{array}\right]=\left[\begin{array}{c}\dot{2 \delta \mathbf{q}}\end{array}\right] &=\delta \mathbf{q} \otimes \delta \boldsymbol{\omega}_{G} \\ &=\Omega\left(\delta \boldsymbol{\omega}_{G}\right) \delta \mathbf{q} \\
+&=\left[\begin{array}{cc}{0} & {-\delta \boldsymbol{\omega}_{G}^{\top}} \\ {\delta \boldsymbol{\omega}_{G}} & {-\left[\delta \boldsymbol{\omega}_{G}\right]_{ \times}}\end{array}\right]\left[\begin{array}{c}{1} \\ {\delta \boldsymbol{\theta} / 2}\end{array}\right]+O\left(\|\delta \boldsymbol{\theta}\|^{2}\right)
+\end{align}
+$$
+同样的,产生一个标量方程和矢量方程
+$$
+\begin{align} 0 &=\delta \boldsymbol{\omega}_{G}^{\top} \delta \boldsymbol{\theta}+O\left(|\delta \boldsymbol{\theta}|^{2}\right) \\ \dot{\delta \boldsymbol{\theta}} &=\delta \boldsymbol{\omega}_{G}-\frac{1}{2}\left[\delta \boldsymbol{\omega}_{G}\right]_{ \times} \delta \boldsymbol{\theta}+O\left(\|\delta \boldsymbol{\theta}\|^{2}\right) \end{align}
+$$
+
+在忽略了高阶项后,第二个公式变成了
+$$
+\dot{\delta \boldsymbol{\theta}}=\delta \boldsymbol{\omega}_{G}=\mathbf{R} \delta \boldsymbol{\omega}
+$$
+也可以变为以下形式
+$$
+\dot{\delta \boldsymbol{\theta}}=-\mathbf{R} \delta \boldsymbol{\omega}_{b}-\mathbf{R} \boldsymbol{\omega}_{n}
+$$
+
+#### 离散时间系统运动方程
+
+##### 标称状态
+
+和上面一样标称状态方程没有误差,所以在没有变化
+
+##### 误差状态
+
+使用欧拉积分,我们获得了下面的微分方程
+$$
+\begin{array}{l}{\delta \mathbf{p} \leftarrow \delta \mathbf{p}+\delta \mathbf{v} \Delta t} \\ {\delta \mathbf{v} \leftarrow \delta \mathbf{v}+\left(-\left[\mathbf{R}\left(\mathbf{a}_{m}-\mathbf{a}_{b}\right)\right]_{ \times} \delta \boldsymbol{\theta}-\mathbf{R} \delta \mathbf{a}_{b}+\delta \mathbf{g}\right) \Delta t+\mathbf{v}_{\mathbf{i}}} \\ {\delta \boldsymbol{\theta} \leftarrow \delta \boldsymbol{\theta}-\mathbf{R} \delta \boldsymbol{\omega}_{b} \Delta t+\boldsymbol{\theta}_{\mathbf{i}}} \\ {\delta \mathbf{a}_{b} \leftarrow \delta \mathbf{a}_{b}+\mathbf{a}_{\mathbf{i}}} \\ {\delta \boldsymbol{\omega}_{b} \leftarrow \delta \boldsymbol{\omega}_{b}+\boldsymbol{\omega}_{\mathbf{i}}} \\ {\delta \mathbf{g} \leftarrow \delta \mathbf{g}}\end{array}
+$$
+
+##### 误差状态雅克比和扰动矩阵
+
+ 转移矩阵为
+$$
+\mathbf{F}_{\mathbf{x}}=\left[\begin{array}{cccccc}{\mathbf{I}} & {\mathbf{I} \Delta t} & {0} & {0} & {0} & {0} \\ {0} & {\mathbf{I}} & {-\left[\mathbf{R}\left(\mathbf{a}_{m}-\mathbf{a}_{b}\right)\right]_{ \times} \Delta t} & {-\mathbf{R} \Delta t} & {0} & {\mathbf{I} \Delta t} \\ {0} & {0} & {{\mathbf{I}}} & {0} & {-\mathbf{R} \Delta t} & {0} \\ {0} & {0} & {0} & {\mathbf{I}} & {0} & {0} \\ {0} & {0} & {0} & {0} & {\mathbf{I}} & {0} \\ {0} & {0} & {0} & {0} & {0} & {\mathbf{I}}\end{array}\right]
+$$
+我们可以观察到对于局部角度误差和全局角度误差来说,总共有三处改变.
+
+![](/home/liu/Documents/some_notes/VIO公式推导/全局角度误差和局部角度误差.png)
+
+而扰动的雅克比和扰动协方差矩阵没有变化
+$$
+\mathbf{F}_{\mathbf{i}}=\left[\begin{array}{ccc}{0} & {0} & {0} & {0} \\ {\mathbf{I}} & {0} & {0} & 0 \\ {0} & {\mathbf{I}} & {0} & 0  \\ {0} & 0 & {\mathbf{I}} & {0} \\ {0} & {0} & {0} & {\mathbf{I}} \\ {0} & {0} & {0} & {0}\end{array}\right] \quad, \quad \mathbf{Q}_{\mathbf{i}}=\left[\begin{array}{cccc}{\mathbf{V}_{\mathbf{i}}} & {0} & {0} & {0} \\ {0} & {\boldsymbol{\Theta}_{\mathbf{i}}} & {0} & {0} \\ {0} & {0} & {\mathbf{A}_{\mathbf{i}}} & {0} \\ {0} & {0} & {0} & {\Omega_{\mathbf{i}}}\end{array}\right]
+$$
+
+#### 传感器数据融合互补
+
+在考虑全局角度误差的时候, ESKF方程有些许不同.我们通过ESKF校正,将误差注入标称状态以及复位步骤来修正错误状态观察中的这些变化
+
+##### 误差状态观测
+
+
 
 
 
