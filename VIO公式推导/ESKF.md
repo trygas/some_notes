@@ -483,20 +483,63 @@ $$
 
 ##### 误差状态观测
 
+在雅克比块中和局部误差唯一的不同就是角度误差的雅克比块了,新的雅克比块如下所示
+$$
+\begin{array} \mathbf{Q}_{\delta \theta} \triangleq\left.\frac{\Delta(\delta \mathbf{q} \otimes \mathbf{q})}{\partial \delta \boldsymbol{\theta}}\right|_{\mathbf{q}} &=\left.\frac{\partial(\delta \mathbf{q} \otimes \mathbf{q})}{\partial \delta \mathbf{q}}\right|_{\mathbf{q}}\left.\frac{\partial \delta \mathbf{q}}{\partial \delta \boldsymbol{\theta}}\right|_{\delta \theta=0} \\ &=[\mathbf{q}]_{R} \frac{1}{2}\left[\begin{array}{cc}{0} & {0} & 0 \\ {1} & {0}  & 0\\ {0} & {1} & 0 \\ {0} & 0 &  {1}
+\end{array}\right] \\
+&=\frac{1}{2}\left[\begin{array}{ccc}{-q_{x}} & {-q_{y}} & {-q_{z}} \\ {q_{w}} & {q_{z}} & {-q_{y}} \\ {-q_{z}} & {q_{w}} & {q_{x}} \\ {q_{y}} & {-q_{x}} & {q_{w}}\end{array}\right]
+& \end{array}
+$$
 
+##### 观测误差注入到标称状态
 
+$\mathbf{x} \leftarrow \mathbf{x} \oplus \hat{\delta \mathbf{x}}$,在将误差状态注入到标称状态,
+$$
+\begin{array}{l}{\mathbf{p} \leftarrow \mathbf{p}+\delta \mathbf{p}} \\ {\mathbf{v} \leftarrow \mathbf{v}+\delta \mathbf{v}} \\ {\mathbf{q} \leftarrow \mathbf{q}\{\hat{\delta} \hat{\boldsymbol{\theta}}\} \otimes \mathbf{q}} \\ {\mathbf{a}_{b} \leftarrow \mathbf{a}_{b}+\delta \mathbf{a}_{b}} \\ {\boldsymbol{\omega}_{b} \leftarrow \boldsymbol{\omega}_{b}+\delta \boldsymbol{\omega}_{b}} \\ {\mathbf{g} \leftarrow \mathbf{g}+\delta \mathbf{g}}\end{array}
+$$
+在上面的公式中,只有四元数改变了.
 
+##### ESKF重置
 
+ESKF误差均值被重置了,协方差矩阵也更新了,如下所示
+$$
+\begin{array}{l}{\hat{\delta \mathbf{x}} \leftarrow 0} \\ {\mathbf{P} \leftarrow \mathbf{G} \mathbf{P} \mathbf{G}^{\top}}\end{array}
+$$
+其中雅克比为
+$$
+\mathbf{G}=\left[\begin{array}{ccc}{\mathbf{I}_{6}} & {0} & {0} \\ {0} & {\mathbf{I}+\left[\frac{1}{2} \hat{\delta} \boldsymbol{\theta}\right]}_{×} & {0} \\ {0} & {0} & {\mathbf{I}_{9}}\end{array}\right]
+$$
 
+我们的目标是获得相比较旧的误差$\delta \boldsymbol{\theta}$新的角度误差$\delta \boldsymbol{\theta}^{+}$的表达,和局部坐标系表示方法一样,我们列出下面几个事实
 
+- 真实的角度在误差重置的时候不会改变,也就是$\mathbf{q}_{t}^{+} \equiv \mathbf{q}_{t}$,这就意味着
 
+$$
+\delta \mathbf{q}^{+} \otimes \mathbf{q}^{+}=\delta \mathbf{q} \otimes \mathbf{q}
+$$
 
+- 观测到的误差均值已经被注入到标称状态中了
 
+$$
+\mathbf{q}^{+}=\hat{\delta} \mathbf{q} \otimes \mathbf{q}
+$$
 
-
-
-
-
+考虑到这些情况我们可以获得新的角度误差相对于旧的角度误差和观测误差$\hat{\delta q}$的表达式
+$$
+\delta \mathbf{q}^{+}=\delta \mathbf{q} \otimes \hat{\delta \mathbf{q}}^{*}=\left[\hat{\delta \mathbf{q}}^{*}\right]_{R} \cdot \delta \mathbf{q}
+$$
+因为$\hat{\delta \mathbf{q}}^{*} \approx\left[\begin{array}{r}{1} \\ {-\frac{1}{2} \delta \hat{\boldsymbol{\theta}}}\end{array}\right]$,上面的表达式可以扩展为
+$$
+\left[\begin{array}{c}{1} \\ {\frac{1}{2} \delta \boldsymbol{\theta}^{+}}\end{array}\right]=\left[\begin{array}{cc}{1} & {\frac{1}{2} \delta \hat{\boldsymbol{\theta}}^{\top}} \\ {-\frac{1}{2} \hat{\delta \boldsymbol{\theta}}} &{ \mathbf{I}+\left[\frac{1}{2} \hat{\delta} \boldsymbol{\theta}\right]_{ \times}}\end{array}\right] \cdot\left[\begin{array}{c}{1} \\ {\frac{1}{2} \delta \boldsymbol{\theta}}\end{array}\right]+\mathcal{O}\left(\|\delta \boldsymbol{\theta}\|^{2}\right)
+$$
+同样的,这也导致了一个标量方程和一个矢量方程
+$$
+\begin{aligned} \frac{1}{4} \hat{\delta} \boldsymbol{\theta}^{\top} \delta \boldsymbol{\theta} &=\mathcal{O}\left(\|\delta \boldsymbol{\delta}\|^{2}\right) \\ \delta \boldsymbol{\theta}^{+} &=-\hat{\delta\boldsymbol{\theta}}+\left(\mathbf{I}+\left[\frac{1}{2} \hat{\delta} \boldsymbol{\theta}\right]_{ \times}\right) \delta \boldsymbol{\theta}+\mathcal{O}\left(\|\delta \boldsymbol{\theta}\|^{2}\right) \end{aligned}
+$$
+同时我们知道$\hat{\delta \boldsymbol{\theta}}^{+}=0$,所以雅克比可以化为
+$$
+\frac{\partial \delta \boldsymbol{\theta}^{+}}{\partial \delta \boldsymbol{\theta}}=\mathbf{I}+\left[\frac{1}{2} \hat{\delta \boldsymbol{\theta}}\right]_{ \times}
+$$
 
 ### Appendix
 

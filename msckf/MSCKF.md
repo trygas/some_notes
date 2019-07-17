@@ -304,12 +304,46 @@ $$
 
 ![](./重投影误差的雅克比.png)
 
+另外,根据链式法则,同样计算出关于路标点$^{G} \hat{p}_{f_{j}}$的雅克比
+$$
+H_{f_{j}}=\frac{\partial r}{\partial^{G} \hat{p}_{f_{j}}}=\frac{\partial r}{\partial P_{c}^{\prime}} \frac{\partial P_{c}^{\prime}}{\partial^{G} \hat{p}_{f_{j}}}=J_{P_{c}^{\prime}} \times R_{C+G}
+$$
+其中,$J_{P_{c}^{\prime}}$为重投影误差相对于相机系下坐标$P_{c}^{\prime}$的雅克比
+$$
+J_{P_{C}^{\prime}}=\frac{\partial r}{\partial P_{c}^{\prime}}=\frac{1}{\hat{z}}\left[\begin{array}{ccc}{1} & {0} & {-\frac{x}{\hat z}} \\ {0} & {1} & {-\frac{y}{\hat z}}\end{array}\right]
+$$
+我们将对该路标点的所有Camera观测汇总可得(设该路标点被M个Camera观测到)
+$$
+r^{2 M \times 1} \cong H_{X}^{2 M \times(15+6 N)} \tilde{X}^{(15+6 N) \times 1}+H_{f}^{2 M \times 3} G_{\hat{p}_{f}}^{3 \times 1}+n^{2 M \times 1}
+$$
+上式中与该路标点有关的所有视觉约束银子关于观测到的相机位姿的整体雅克比$H_{X}^{2 M \times(15+6 N)}$可表示为下图
 
+,每行表示一个相机观测到第j个路标点产生的视觉误差关于整体误差状态向量的雅克比,可见每行只有观测到路标点的相机位姿处有值,其他处均为0,最后的黄色列表示视觉误差关于路标点的世界坐标$^{G} \hat{p}_{f_{j}}$的雅克比
 
+![](./视觉误差雅克比.png)
 
+下面给出当最新帧有多个路标点看不见时,对应的所有路标点的重投影误差对整体误差状态向量和相应路标点坐标值的雅克比
 
+![](./多个路标点雅克比.png)
 
+#### 视觉雅克比处理
 
+对于EKF,残差线性化要满足以下形式,即**残差仅与一组状态向量的误差项成线性化关系,且噪声项为与状态向量无关的零均值的高斯分布**,即残差应能简化为这种形式:$r \cong H \delta x+n$.
+
+**而MSCKF的残差与两个状态向量的误差项相关,不满足上式的线性化形式,所以不能直接用EKF的测量更新流程.**
+
+为了克服这个问题,我们将原来的残差$r^{2 M \times 1}$投影到$H_{f}^{2 M \times 3 M_{L}}$的左零空间中(左零空间大小为$M \times\left(2 M-3 M_{L}\right)$),并令投影后的残差为$r_{0}^{\left(2 M-3 M_{L}\right) \times 1}$.令矩阵A为半正交矩阵(即$\mathrm{A}^{T} A=I$),A的列组成了$H_f$的左零空间,可得
+$$
+\begin{array}{c}{r_{0}^{\left(2 M-3 M_{L}\right) \times 1}=A^{T} r^{2 M \times 1} \cong \underbrace{A^{T} H_{X}^{2 M \times(15+6 N)}}_{H_{0}} \tilde{X}^{(15+6 N) \times 1}+\underbrace{A^{T} n^{2 M \times 1}}_{n_{0}}} \\ {=H_{0}^{(2 M-3M_{L}) \times(15+6 N)} \tilde{X}^{(15+6 N) \times 1}+n_{0}^{(2 M-3M_{L}) \times 1}}\end{array}
+$$
+其中,$\mathrm{A}^{2 M \times(2 M-3M_{L})}$.
+
+### 视觉更新
+
+当某个路标点不见或者太老时,即因为遮挡或视野等问题不能被当前帧所观测到,或者该路标点被观测到的共视帧数量大于某个阈值时进行EKF更新过程.因为通常$H_0$的矩阵很大,为了降低计算量,我们对$H_0$进行QR分解.
+$$
+H_{0}^{(2 M-3M_{L}) \times(15+6 N)}=\left[\begin{array}{ll}{Q_{1}} & {Q_{2}}\end{array}\right]\left[\begin{array}{c}{T_{H}} \\ {0}\end{array}\right]
+$$
 
 
 
