@@ -344,15 +344,30 @@ $$
 $$
 H_{0}^{(2 M-3M_{L}) \times(15+6 N)}=\left[\begin{array}{ll}{Q_{1}} & {Q_{2}}\end{array}\right]\left[\begin{array}{c}{T_{H}} \\ {0}\end{array}\right]
 $$
+其中,$Q_{1}^{(2 M-3M_L) \times(15+6 N)}, Q_{2}^{(2 M-3M_L) \times(15+6 N)}$为正交矩阵,$T_{H}(15+6 N) \times(15+6 N)$为上三角矩阵.
 
+那么视觉误差公式可以化为
+$$
+\left[\begin{array}{l}{Q_{1}^{T} r_{0}} \\ {Q_{2}^{T} r_{0}}\end{array}\right]=\left[\begin{array}{c}{T_{H}} \\ {0}\end{array}\right] \tilde{X}+\left[\begin{array}{l}{Q_{1}^{T} n_{0}} \\ {Q_{2}^{T} n_{0}}\end{array}\right]
+$$
+如果我们忽略仅为噪声项的$Q_{2}^{T} r_{0}$,那么可得最后的观测方程
+$$
+\begin{aligned} Q_{1}^{T} r_{0} &=T_{H} \tilde{X}+Q_{1}^{T} n_{0} \\ \Rightarrow r_{n}^{(15+6 N) \times 1} &=T_{H} \tilde{X}+n_{n} \end{aligned}
+$$
+其中,$n_n$的协方差矩阵为$R_{n}=Q_{1}^{T} R_{0} Q_{1}=\sigma_{i m}^{2} I_{r}$.
 
-
-
-
-
-
-
-
+最后,我们应用EKF的更新公式,可得卡尔曼增益为
+$$
+K=P T_{H}^{T}\left(T_{H} P T_{H}^{T}+R_{n}\right)^{-1}
+$$
+则误差状态向量的增量可求解为
+$$
+\Delta X=K r_{n}
+$$
+协方差矩阵为
+$$
+P_{k+1 | k+1}=\left(I_{\xi}-K T_{H}\right) P_{k+1 | k}\left(I_{\xi}-K T_{H}\right)^{T}+K R_{n} K^{T}
+$$
 
 
 ### 附录
