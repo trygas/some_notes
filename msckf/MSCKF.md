@@ -91,8 +91,9 @@
       - 在这里面首先让角速度和加速度减去各自的偏置.**(在MSCKF的代码中,角速度偏置在初始化重力的时候就求了出来,而加速度偏置则是直接赋值为0)**,获取当前IMU信息和上一个IMU信息的时间差.
       - 然后就是构建F矩阵和G矩阵.
       - 得到了F,H矩阵后,但是F,H是连续时间下的误差方程,所以我们需要离散化.这个时候我们需要计算出$\Phi$矩阵.$\boldsymbol{\Phi}=\exp \left(\int_{t_{k}}^{t_{k+1}} \mathbf{F}(\tau) d \tau\right)$这里保留其三阶泰勒展开.$\boldsymbol{\Phi} \approx \mathbf{I}+\mathbf{F} d_{t}+\frac{1}{2}\left(\mathbf{F} d_{t}\right)^{2}+\frac{1}{6}\left(\mathbf{F} d_{t}\right)^{3}$
-      - 采用四阶龙格库塔方法来使用当前IMU信息估计新的IMU状态.MsckfVio::predictNewState()函数
-        - 
+      - 采用四阶龙格库塔方法来使用当前IMU信息估计新的IMU状态.调用了MsckfVio::predictNewState()函数
+        - 首先对角速度的四元数进行求导.然后计算角速度的二范数,再乘上时间就是转的角度.$\phi=\|\boldsymbol{\omega}\|_{2} \cdot \Delta t$
+        - 接着计算$\phi$对应的四元数为$\mathbf{q}=\left(\begin{array}{c}{\cos (\phi / 2)} \\ {\mathbf{u} \sin (\phi / 2)}\end{array}\right)=\left(\begin{array}{c}{q_{w}} \\ {\mathbf{q}_{v}}\end{array}\right)$.
 
 ### 公式推导
 
