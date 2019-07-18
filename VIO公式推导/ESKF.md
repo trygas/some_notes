@@ -543,6 +543,74 @@ $$
 
 ### Appendix
 
+#### 龙格库塔数值积分方法
+
+我们想要对以下这种形式的非线性微分方程在时间长度$\Delta t$进行积分
+$$
+\dot{\mathbf{x}}=f(t, \mathbf{x})
+$$
+将这个公式转化为一个差分方程
+$$
+\mathbf{x}(t+\Delta t)=\mathbf{x}(t)+\int_{t}^{t+\Delta t} f(\tau, \mathbf{x}(\tau)) d \tau
+$$
+又或者我们可以让$t_{n}=n \Delta t$ 和 $\mathbf{x}_{n} \triangleq \mathbf{x}\left(t_{n}\right)$,
+$$
+\mathbf{x}_{n+1}=\mathbf{x}_{n}+\int_{n \Delta t}^{(n+1) \Delta t} f(\tau, \mathbf{x}(\tau)) d \tau
+$$
+
+##### 欧拉法
+
+欧拉法假设导数$f(\cdot)$在整个积分区间内是常数,因此
+$$
+\mathbf{x}_{n+1}=\mathbf{x}_{n}+\Delta t \cdot f\left(t_{n}, \mathbf{x}_{n}\right)
+$$
+
+##### 中值法
+
+中值法假设导数在区间的中点,并且计算了中点的值,公式为
+$$
+\mathbf{x}_{n+1}=\mathbf{x}_{n}+\Delta t \cdot f\left(t_{n}+\frac{1}{2} \Delta t, \mathbf{x}_{n}+\frac{1}{2} \Delta t \cdot f\left(t_{n}, \mathbf{x}_{n}\right)\right)
+$$
+上面的步骤可以展开为以下两个步骤,首先使用欧拉积分法积分出中值,
+$$
+\begin{align}  {} k_1 &=f\left(t_{n}, \mathbf{x}_{n}\right) \\ \mathbf{x}\left(t_{n}+\frac{1}{2} \Delta t\right) &=\mathbf{x}_{n}+\frac{1}{2} \Delta t \cdot k_{1} \end{align}
+$$
+
+接着,使用中值计算出中值的导数,接着积分
+$$
+\begin{align} k_{2} &=f\left(t_{n}+\frac{1}{2} \Delta t, \mathbf{x}\left(t_{n}+\frac{1}{2} \Delta t\right)\right) \\ \mathbf{x}_{n+1} &=\mathbf{x}_{n}+\Delta t \cdot k_{2} \end{align}
+$$
+
+##### RK4方法
+
+RK4方法积分公式如下
+$$
+\mathbf{x}_{n+1}=\mathbf{x}_{n}+\frac{\Delta t}{6}\left(k_{1}+2 k_{2}+2 k_{3}+k_{4}\right)
+$$
+其中
+$$
+\begin{array}{l}{k_{1}=f\left(t_{n}, \mathbf{x}_{n}\right)} \\ {k_{2}=f\left(t_{n}+\frac{1}{2} \Delta t, \mathbf{x}_{n}+\frac{\Delta t}{2} k_{1}\right)} \\ {k_{3}=f\left(t_{n}+\frac{1}{2} \Delta t, \mathbf{x}_{n}+\frac{\Delta t}{2} k_{2}\right)} \\ {k_{4}=f\left(t_{n}+\Delta t, \mathbf{x}_{n}+\Delta t \cdot k_{3}\right)}\end{array}
+$$
+每个斜率都有不同的意义
+
+- $k_1$是最开始的斜率,$\mathbf{x}_{n}$
+- $k_2$是中值的斜率,$\mathbf{x}_{n}+\frac{1}{2} \Delta t \cdot k_{1}$
+- $k_3$也是中值法,但是乘的斜率是$k_2$,$\mathbf{x}_{n}+\frac{1}{2} \Delta t \cdot k_{2}$
+- $k_4$是$\mathbf{x}_{n}+\Delta t \cdot k_{3}$.
+
+##### 通常龙格库塔方法
+
+也用更加详细的RK方法,也是为了减少误差或者增加稳定性,通常形式为
+$$
+\mathbf{x}_{n+1}=\mathbf{x}_{n}+\Delta t \sum_{i=1}^{s} b_{i} k_{i}
+$$
+其中,
+$$
+k_{i}=f\left(t_{n}+\Delta t \cdot c_{i}, \mathbf{x}_{n}+\Delta t \sum_{j=1}^{s} a_{i j} k_{j}\right)
+$$
+阶数为$s$,平均权重为$b_i$,积分时间为$c_i$,斜率$k_i$由$a_{ij}$决定.
+
+
 #### 积分方法
 
 在很多时候我们能够获得积分部分的闭环表达.我们现在考虑一阶线性微分方程.
