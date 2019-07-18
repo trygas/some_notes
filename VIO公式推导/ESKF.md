@@ -261,9 +261,11 @@ $$
 \\  & & & \frac{\partial\left(\mathbf{a}_{b}+\delta \mathbf{a}_{b}\right)}{\partial \delta \mathbf{a}_{b}} & & \\ & & & &  \frac{\partial\left(\boldsymbol{\omega}_{b}+\delta \boldsymbol{\omega}_{b}\right)}{\partial \delta \boldsymbol{\omega}_{b}} & \\ & & & &  &   \frac{\partial(\mathbf{g}+\delta \mathbf{g})}{\partial \delta \mathbf{g}}  \end{array}\right]
 $$
 
-除了4×3的四元数项$$
+除了4×3的四元数项
+$$
 \mathbf{Q}_{\delta \boldsymbol{\theta}}=\partial(\mathbf{q} \otimes \delta \mathbf{q}) / \partial \delta \boldsymbol{\theta}
-$$外,其它每一项都是3×3的块(例如$\frac{\partial(\mathbf{p}+\delta \mathbf{p})}{\partial \delta \mathbf{p}}=\mathbf{I}_{3}$)因此,我们有以下的形式
+$$
+外,其它每一项都是3×3的块(例如$\frac{\partial(\mathbf{p}+\delta \mathbf{p})}{\partial \delta \mathbf{p}}=\mathbf{I}_{3}$)因此,我们有以下的形式
 $$
 \mathbf{X}_{\delta \mathbf{x}} \triangleq\left.\frac{\partial \mathbf{x}_{t}}{\partial \delta \mathbf{x}}\right|_{\mathbf{x}}=\left[\begin{array}{ccc}{\mathbf{I}_{6}} & {0} & {0} \\ {0} & {\mathbf{Q}_{\delta \boldsymbol{\theta}}} & {0} \\ {0} & {0} & {\mathbf{I}_{9}}\end{array}\right]
 $$
