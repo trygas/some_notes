@@ -1,5 +1,9 @@
 [TOC]
 
+### Tips
+
+Quaternion kinematics for the error-state Kalman filter 中的四元数是Hamilton表示方法,而MSCKF中采用的是JPL表示方法.
+
 # MSCKF(双目)
 
 ### 视觉前端
