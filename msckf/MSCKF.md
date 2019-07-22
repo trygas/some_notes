@@ -97,7 +97,22 @@ Quaternion kinematics for the error-state Kalman filter 中的四元数是Hamilt
       - 得到了F,H矩阵后,但是F,H是连续时间下的误差方程,所以我们需要离散化.这个时候我们需要计算出$\Phi$矩阵.$\boldsymbol{\Phi}=\exp \left(\int_{t_{k}}^{t_{k+1}} \mathbf{F}(\tau) d \tau\right)$这里保留其三阶泰勒展开.$\boldsymbol{\Phi} \approx \mathbf{I}+\mathbf{F} d_{t}+\frac{1}{2}\left(\mathbf{F} d_{t}\right)^{2}+\frac{1}{6}\left(\mathbf{F} d_{t}\right)^{3}$
       - 采用四阶龙格库塔方法来使用当前IMU信息估计新的IMU状态.调用了MsckfVio::predictNewState()函数
         - 首先对角速度的四元数进行求导.然后计算角速度的二范数,再乘上时间就是转的角度.$\phi=\|\boldsymbol{\omega}\|_{2} \cdot \Delta t$
-        - 接着计算$\phi$对应的四元数为$\mathbf{q}=\left(\begin{array}{c}{\cos (\phi / 2)} \\ {\mathbf{u} \sin (\phi / 2)}\end{array}\right)=\left(\begin{array}{c}{q_{w}} \\ {\mathbf{q}_{v}}\end{array}\right)$.
+
+        - 接着计算$\phi$对应的四元数为$\mathbf{q}=\left(\begin{array}{c}{\cos (\phi / 2)} \\ {\mathbf{u} \sin (\phi / 2)}\end{array}\right)=\left(\begin{array}{c}{q_{w}} \\ {\mathbf{q}_{v}}\end{array}\right)$.**(这里上下反了,MSCKF使用的是GPL形式的四元素,实部在下,虚部在上.)**然后计算更新后的四元数$\mathbf{q}_{k+1}=\mathbf{q} \otimes \mathbf{q}_{k}$
+          $=\left(q_{w} \mathbf{I}+\left(\begin{array}{cc}{-\lfloor\boldsymbol{\omega} \times\rfloor} & {\omega} \\ {-\boldsymbol{\omega}^{T}} & {0}\end{array}\right)\right) \mathbf{q}_{k}=\left(q_{w} \mathbf{I}+\boldsymbol{\Omega}(\boldsymbol{\omega})\right) \mathbf{q}_{k}$这里面的$\omega$是上面的$\mathbf{u}sin(\phi/2)$,在代码中,先算出了角度$\phi$,然后计算出角度的反对称矩阵的归一化矩阵,将归一化矩阵看做是旋转轴$\mathbf{u}$.同时计算出更新$1/2\Delta t$的角度四元数.
+
+        - 然后需要对上一帧的p,v,q进行更新.这里面的q的更新就是之前计算出来的更新后的四元数.**(这个q存的是归一化之后的方向.)v和p的更新是通过四阶龙格库塔方法计算出来的.这里v的更新的四个参数是通过之前算出来的$1/2\Delta t$更新后的角度得出的.**$\begin{aligned} k_{1}^{v} &=\mathbf{q}_{k}^{-1} \otimes \mathbf{a}_{k}+\mathbf{g}^{w} \\ k_{2}^{v} &=d 2 * \mathbf{a}_{k}+\mathbf{g}^{w} \\ k_{3}^{v} &=d 2 * \mathbf{a}_{k}+\mathbf{g}^{w} \\ k_{4}^{v} &=d 1 * \mathbf{a}_{k}+\mathbf{g}^{w} \end{aligned}$
+
+        - 而p的更新则是通过v的更新算出的k值计算出p的k值.
+
+          $k_{1}^{p}=\mathbf{v}_{k}$
+          $k_{2}^{p}=\mathbf{v}_{k}+\frac{1}{2} k_{1}^{v} \Delta t$
+          $k_{3}^{p}=\mathbf{v}_{k}+\frac{1}{2} k_{2}^{v} \Delta t$
+          $k_{4}^{p}=\mathbf{v}_{k}+k_{3}^{v} \Delta t$
+
+        - 然后把上面的系数代入到RK4积分公式中就得到了$\mathbf{v}_{k+1}, \mathbf{p}_{k+1}$,更新state_server.imu_state.
+
+      - 现在开始更新转移矩阵$\Phi$和$\mathbf{P}$.
 
 ### 公式推导
 
