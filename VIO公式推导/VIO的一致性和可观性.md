@@ -128,3 +128,10 @@ $$
 
 ### VIO可观性分析
 
+在本节中,当执行任意运动的传感器平台检测到单点特征时,我们将会检查线性化VIO模型的可观测性.具体来说,我们首先研究并分析确定理想线性化VIO模型的四个不可观测方向.随后我们证明EKF使用的线性化VIO模型的雅克比使用当前状态估计值进行评估只有三个不可观测的方向,而对于全局坐标系下的重力向量的旋转是可观测到的.
+
+观测矩阵$\mathbf{M}$定义如下
+$$
+\mathbf{M}\left(\mathbf{x}^{\star}\right)=\left[\begin{array}{c}{\mathbf{H}_{1}} \\ {\mathbf{H}_{2} \mathbf{\Phi}_{2,1}} \\ {\vdots} \\ {\mathbf{H}_{k} \mathbf{\Phi}_{k, 1}}\end{array}\right]
+$$
+其中,$\mathbf{\Phi}_{k, 1}=\mathbf{\Phi}_{k, k-1} \ldots \mathbf{\Phi}_{2,1}$是时间步长1到k的状态转移矩阵.而$\mathbf{H}_k$是测量值的雅克比,对应的特征点观测是时间步长k.
