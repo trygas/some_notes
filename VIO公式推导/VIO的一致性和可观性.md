@@ -134,4 +134,4 @@ $$
 $$
 \mathbf{M}\left(\mathbf{x}^{\star}\right)=\left[\begin{array}{c}{\mathbf{H}_{1}} \\ {\mathbf{H}_{2} \mathbf{\Phi}_{2,1}} \\ {\vdots} \\ {\mathbf{H}_{k} \mathbf{\Phi}_{k, 1}}\end{array}\right]
 $$
-其中,$\mathbf{\Phi}_{k, 1}=\mathbf{\Phi}_{k, k-1} \ldots \mathbf{\Phi}_{2,1}$是时间步长1到k的状态转移矩阵.而$\mathbf{H}_k$是测量值的雅克比,对应的特征点观测是时间步长k.
+其中,$\mathbf{\Phi}_{k, 1}=\mathbf{\Phi}_{k, k-1} \ldots \mathbf{\Phi}_{2,1}$是时间步长1到k的状态转移矩阵.而$\mathbf{H}_k$是测量值的雅克比,对应的特征点观测是时间步长k.我们注意到,因为所有的雅克比行列式都是在一个特殊的状态上估计的,
