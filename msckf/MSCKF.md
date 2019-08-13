@@ -93,8 +93,11 @@ Quaternion kinematics for the error-state Kalman filter 中的四元数是Hamilt
     - 在for循环中首先对IMU数据进行筛选,选择那些上一次积分时间到当前图像时间的IMU数据.
     - 接着处理每个IMU数据,调用processModel()函数.
       - 在这里面首先让角速度和加速度减去各自的偏置.**(在MSCKF的代码中,角速度偏置在初始化重力的时候就求了出来,而加速度偏置则是直接赋值为0)**,获取当前IMU信息和上一个IMU信息的时间差.
+
       - 然后就是构建F矩阵和G矩阵.
+
       - 得到了F,H矩阵后,但是F,H是连续时间下的误差方程,所以我们需要离散化.这个时候我们需要计算出$\Phi$矩阵.$\boldsymbol{\Phi}=\exp \left(\int_{t_{k}}^{t_{k+1}} \mathbf{F}(\tau) d \tau\right)$这里保留其三阶泰勒展开.$\boldsymbol{\Phi} \approx \mathbf{I}+\mathbf{F} d_{t}+\frac{1}{2}\left(\mathbf{F} d_{t}\right)^{2}+\frac{1}{6}\left(\mathbf{F} d_{t}\right)^{3}$
+
       - 采用四阶龙格库塔方法来使用当前IMU信息估计新的IMU状态.调用了MsckfVio::predictNewState()函数
         - 首先对角速度的四元数进行求导.然后计算角速度的二范数,再乘上时间就是转的角度.$\phi=\|\boldsymbol{\omega}\|_{2} \cdot \Delta t$
 
@@ -112,7 +115,11 @@ Quaternion kinematics for the error-state Kalman filter 中的四元数是Hamilt
 
         - 然后把上面的系数代入到RK4积分公式中就得到了$\mathbf{v}_{k+1}, \mathbf{p}_{k+1}$,更新state_server.imu_state.
 
-      - 现在开始更新转移矩阵$\Phi$和$\mathbf{P}$.
+      - 现在开始更新转移矩阵$\Phi$和$\mathbf{P}$.(在这里的转移矩阵$\Phi$是经过了不可观测性校正的).计算$\Phi$是通过上一次和这一次的$\Phi$的右零空间计算出来的.我们在之前已经算过一次$\Phi$了,这次是对$\Phi$的更新.
+
+        **首先我们需要预测后的角度也就是龙格库塔积分后的IMU状态.(此时状态为$k+1|k$).,这个就是这一次的右零空间值,处于(1,2)的位置.然后,我们需要上一次的右零空间值,如果是第一次的话就是(0,0,0,1),如果不是,则是上一次预测的值.然后可以计算$\Phi_{1,1}(3,3)=q_{k+1|k}*(q_{k|k-1}^T)$.接着我们计算$\Phi_{31}$和$\Phi_{51}$.这两个的计算可以看做是类似$\mathbf{Au=w}$的的矩阵运算,实际上是一个最小化优化问题,可以通过公式$\mathbf{A^*=A-(Au-w)(u^Tu)^{-1}u^T}$计算.**
+
+        
 
 ### 公式推导
 
