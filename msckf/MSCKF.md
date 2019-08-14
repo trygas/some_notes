@@ -89,37 +89,37 @@ Quaternion kinematics for the error-state Kalman filter 中的四元数是Hamilt
 
 - 调用featureCallback()函数
   - 首先判断重力是否已经设置**(如果没有设置的话就不能进入后面的代码)**,再判断是否为第一张图,如果是,将state_server.imu_state.time设置为该图像时间.
-  
+
   - 调用batchImuProcessing()函数,对当前帧的所有IMU数据进行处理
     - 在for循环中首先对IMU数据进行筛选,选择那些上一次积分时间到当前图像时间的IMU数据.
     - 接着处理每个IMU数据,调用processModel()函数.
     - 在这里面首先让角速度和加速度减去各自的偏置.**(在MSCKF的代码中,角速度偏置在初始化重力的时候就求了出来,而加速度偏置则是直接赋值为0)**,获取当前IMU信息和上一个IMU信息的时间差.
-  
+
     - 然后就是构建F矩阵和G矩阵.
-  
+
     - 得到了F,H矩阵后,但是F,H是连续时间下的误差方程,所以我们需要离散化.这个时候我们需要计算出$\Phi$矩阵.$\boldsymbol{\Phi}=\exp \left(\int_{t_{k}}^{t_{k+1}} \mathbf{F}(\tau) d \tau\right)$这里保留其三阶泰勒展开.$\boldsymbol{\Phi} \approx \mathbf{I}+\mathbf{F} d_{t}+\frac{1}{2}\left(\mathbf{F} d_{t}\right)^{2}+\frac{1}{6}\left(\mathbf{F} d_{t}\right)^{3}$
-  
+
       - 采用四阶龙格库塔方法来使用当前IMU信息估计新的IMU状态.调用了MsckfVio::predictNewState()函数
       - 首先对角速度的四元数进行求导.然后计算角速度的二范数,再乘上时间就是转的角度.$\phi=\|\boldsymbol{\omega}\|_{2} \cdot \Delta t$
-  
+
         - 接着计算$\phi$对应的四元数为$\mathbf{q}=\left(\begin{array}{c}{\cos (\phi / 2)} \\ {\mathbf{u} \sin (\phi / 2)}\end{array}\right)=\left(\begin{array}{c}{q_{w}} \\ {\mathbf{q}_{v}}\end{array}\right)$.**(这里上下反了,MSCKF使用的是GPL形式的四元素,实部在下,虚部在上.)**然后计算更新后的四元数$\mathbf{q}_{k+1}=\mathbf{q} \otimes \mathbf{q}_{k}$
         $=\left(q_{w} \mathbf{I}+\left(\begin{array}{cc}{-\lfloor\boldsymbol{\omega} \times\rfloor} & {\omega} \\ {-\boldsymbol{\omega}^{T}} & {0}\end{array}\right)\right) \mathbf{q}_{k}=\left(q_{w} \mathbf{I}+\boldsymbol{\Omega}(\boldsymbol{\omega})\right) \mathbf{q}_{k}$这里面的$\omega$是上面的$\mathbf{u}sin(\phi/2)$,在代码中,先算出了角度$\phi$,然后计算出角度的反对称矩阵的归一化矩阵,将归一化矩阵看做是旋转轴$\mathbf{u}$.同时计算出更新$1/2\Delta t$的角度四元数.
-  
+
       - 然后需要对上一帧的p,v,q进行更新.这里面的q的更新就是之前计算出来的更新后的四元数.**(这个q存的是归一化之后的方向.)v和p的更新是通过四阶龙格库塔方法计算出来的.这里v的更新的四个参数是通过之前算出来的$1/2\Delta t$更新后的角度得出的.**$\begin{aligned} k_{1}^{v} &=\mathbf{q}_{k}^{-1} \otimes \mathbf{a}_{k}+\mathbf{g}^{w} \\ k_{2}^{v} &=d 2 * \mathbf{a}_{k}+\mathbf{g}^{w} \\ k_{3}^{v} &=d 2 * \mathbf{a}_{k}+\mathbf{g}^{w} \\ k_{4}^{v} &=d 1 * \mathbf{a}_{k}+\mathbf{g}^{w} \end{aligned}$
-  
+
       - 而p的更新则是通过v的更新算出的k值计算出p的k值.
-  
+
           $k_{1}^{p}=\mathbf{v}_{k}$
           $k_{2}^{p}=\mathbf{v}_{k}+\frac{1}{2} k_{1}^{v} \Delta t$
           $k_{3}^{p}=\mathbf{v}_{k}+\frac{1}{2} k_{2}^{v} \Delta t$
-        $k_{4}^{p}=\mathbf{v}_{k}+k_{3}^{v} \Delta t$
-  
+          $k_{4}^{p}=\mathbf{v}_{k}+k_{3}^{v} \Delta t$
+
       - 然后把上面的系数代入到RK4积分公式中就得到了$\mathbf{v}_{k+1}, \mathbf{p}_{k+1}$,更新state_server.imu_state.
-  
+
     - 现在开始更新转移矩阵$\Phi$.(在这里的转移矩阵$\Phi$是经过了不可观测性校正的).计算$\Phi$是通过上一次和这一次的$\Phi$的右零空间计算出来的.我们在之前已经算过一次$\Phi$了,这次是对$\Phi$的更新.
-  
+
       **首先我们需要预测后的角度也就是龙格库塔积分后的IMU状态.(此时状态为$k+1|k$).,这个就是这一次的右零空间值,处于(1,2)的位置.然后,我们需要上一次的右零空间值,如果是第一次的话就是(0,0,0,1),如果不是,则是上一次预测的值.然后可以计算$\Phi_{1,1}(3,3)=q_{k+1|k}*(q_{k|k-1}^T)$.接着我们计算$\Phi_{31}$和$\Phi_{51}$.这两个的计算可以看做是类似$\mathbf{Au=w}$的的矩阵运算,实际上是一个最小化优化问题,可以通过公式$\mathbf{A^*=A-(Au-w)(u^Tu)^{-1}u^T}$计算.**
-  
+
       - 然后我们计算卡尔曼滤波器的均方误差$\mathbf{P}$.这个均方误差由上次的均方误差和$\Phi$还有离散化噪声协方差计算出来.$\mathbf{Q_k=\Phi GPG^T\Phi^Tdt}$,$\mathbf{P=\Phi P\Phi^T +Ｑ_k}$.
       
         这个时候我们继续更新协方差矩阵，这个矩阵左上角的21×21块是上面计算的均方误差.然后IMU和相机协方差矩阵就是原矩阵乘上$\Phi$.
@@ -127,10 +127,50 @@ Quaternion kinematics for the error-state Kalman filter 中的四元数是Hamilt
         然后为了对称,协方差矩阵和矩阵转置相加除2.
       
       - 接下来更新右零空间,将这次计算的IMU状态传入右零空间.
-    
-  - 接着就是对误差状态向量的增广,调用stateAugmentation()函数.
-  
-    - 根据IMU和相机的外参以及IMU自身的运动模型可以推断出当前相机的位姿.
+
+  - 接着当图像到来时,需要对误差状态向量进行增广,调用stateAugmentation()函数.
+
+    - 根据IMU和相机的外参以及IMU自身的运动模型可以推断出当前相机的位姿.(这里需要预先获得两个值,一个是相机到IMU的旋转.另一个是IMU到相机的位移.)
+
+    - 对相机状态进行增广后,就要对协方差矩阵进行增广,这里首先要计算增广的相机状态对msckf已有状态的雅克比.
+
+      这里计算的雅克比的计算是根据true-state = nominal-state+error-state这个公式计算出来的.然后我们计算增广后的雅克比矩阵.我们可以发现,当对整体协方差矩阵进行增广后,并不影响原来的整体协方差矩阵$\mathbf{P_{k|k}}$,只是在原来的协方差矩阵的最后新增了6行6列而已.并且,增加的只有与$\delta \theta_{I_{N+1}}$和$\tilde {^Gp_{I_{N+1}}}$有关的两处以及对角线处有值,其他处均为0.
+
+    - 最后,确保协方差矩阵的对称性.
+
+  - 当协方差矩阵增广后,我们需要判断特征点是否为新的特征点并将其加入到地图点中.调用addFeatureObservations()函数.
+
+    - 判断特征点是否为新的特征点,如果是新的特征点,则加入到map中,如果是老的特征点,则跟踪计数器加1.
+
+  - 调用removeLostFeatures()函数,剔除那些不能被三角化并且观测过于少的特征点,同时计算雅克比和残差.
+
+    - 首先判断特征点是否被跟踪,如果被跟踪了,则判断下一个特征点.如果没被跟踪且观测数量小于3,则需要移除这个点.
+
+      如果判断这个特征点观测数量大于3,则要判断这个特征点是否能被初始化.
+
+      - 调用checkMotion()函数,这个函数主要是判断第一次观测到某特征点时的相机位置和最后一次观测到该特征点时的相机位置是否存在一个足够的平移.如果没有足够的平移则需要移除这个点.
+
+      - 调用initializePosition()函数,如果判断checkMotion()返回真,则对特征点位置进行初始化.
+
+        - 算法中把计算特征点的3D坐标构建成了一个最小二乘问题,利用LM算法进行求解.在进行优化之前,首先要得到一个初始估计.
+
+        - 在计算初始估计时,调用generateInitialGuess()函数,取观测到该特征点的第一帧的左相机归一化坐标和观测到该特征点的最后一帧的右相机归一化坐标进行三角化来估计深度,通过足够大的平移来保证一个较高的精度.
+
+        - 接下来就是基于LM算法的非线性优化,优化变量为:$\mathbf{x=(\overline{x} \quad \overline{y} \quad \rho)^T}$,其中$\overline{x}$和$\overline{y}$是特征点的归一化坐标,$\rho$为逆深度.
+
+          假设该特征点在第j帧图像的观测值的诡异化坐标为$\mathbf{m_j}$,第j帧相机位姿相对于第一次观测到该特征点的相机的相对位姿为$\mathbf{R, t}$,则重投影误差为$\mathbf{r=Rp+\rho t - m_j}$.在这里,我们只取$\mathbf{r}$的前两维$\mathbf{r_{2\times1}= (r_x \quad r_y)^T}$.接着就是计算雅克比矩阵$\mathbf{J}$.
+
+          然后根据误差来计算权值,如果误差小于一定值,则权值为1.0,若大于该值,则根据huber核函数计算权值.
+
+          然后基于LM算法构建增量方程$\mathbf{(A+\lambda I)\delta x=b}$.
+
+          如果新的cost比上一次cost小,则将$\lambda$除10,如果比上一次的cost大,则将$\lambda$乘10.
+
+        - 然后也要判断计算出来的特征点的3D位置是否在相机前面,如果不在相机前面,也不能初始化.
+
+      - 
+
+        
 
 ### 公式推导
 
