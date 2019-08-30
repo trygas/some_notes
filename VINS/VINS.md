@@ -223,3 +223,11 @@
         (\Lambda _c-\Lambda^T\Lambda_a^{-1}\Lambda_b)\delta x_b = g_b-\Lambda_b^T\Lambda_a^{-1}g_a
         $$
         值得说明的是,上面的公式即为要保留变量$\delta x_b$的先验信息.
+
+        - 边缘化的第一步是定义损失函数,这个定义损失函数和前面的IMU项,视觉项差不多,都重载了损失函数类ceres::CostFunction,重载了函数Evaluate(),这个函数传入优化变量parameters以及先验值(这个就是上一时刻的先验残差last_marginalization_info),可以计算出各项残差值residuals,以及残差对应各个优化变量的雅克比矩阵.
+
+        - 第二步定义ResidualBlockInfo,这一步是为了将不同的损失函数和优化变量统一起来再一起添加到marginalization_info中,另外对于边缘化来说还有一个特殊的优化变量那就是优化变量的位置drop_set.
+
+          对于先验损失,其待边缘化优化变量是根据是否等于para_pose[0]或者para_SpeedBias[0],也就是说和第一帧相关的优化变量都作为边缘化的对象.
+
+          对于IMU,其输入的drop_set是vector{0, 1},也就是说其待边缘化优化变量为para_Pose[0],para_SpeedBias[0],也是第一帧相关的变量都作为边缘化的对象.这里值得注意的是和后端优化不同,这里只添加了第一帧和第二帧的相关变量作为优化变量,因此边缘化构造的信息矩阵会比后端优化构造的信息矩阵要小.
