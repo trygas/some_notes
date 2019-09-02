@@ -262,6 +262,47 @@
 
 ##### 回环检测(pose_graph_node.cpp)
 
-VINS是采用BRIEF描述子的DBoW2词袋进行闭环检测,因为前端识别的Harris角点数量通常只有70个,对于闭环检测远远不够,因此会对新来的KeyFrame即后端非线性优化刚处理的关键帧再重新检测出500个FAST角点进行闭环检测用,同时对所有新老角点进行BRIEF描述.然后计算当前帧和词袋的相似度分数,并与关键帧数据库中所有帧进行对比,并进行闭环一致性检测,获得闭环的候选帧.
+在这个cpp文件中,首先定义了全局变量posegraph.在定义了这个变量的过程中,由于posegraph的初始化,因此开启了一个持续不断的新线程:
 
-首先在pose_graph_node加载vocabulary文件给BriefDatabase用,如果要加载地图,会调用loadPoseGraph()函数,这个函数会读取一些列文件,然后加载所有的Keyframe.同时经过一系列回调函数得到建立新的Keyframe所用的数据后,构造Keyframe,且在其内重新提取更多的特征点并计算描述子,然后pose_graph调用addKeyframe()函数.
+optimize4DOF(),即全局优化一个4自由度的过程.该线程由于IMU的存在,使得6自由度的问题一下子降了两维,并且每结束一次优化的过程,该线程就会睡眠2秒中,再继续.optimize4DOF优化的前提条件:optimize_buf不等于空.添加optimize_buf的内容只有两个地方,一个是addKeyFrame()函数,一个是loadKeyFrame()函数.
+
+loadKeyFrame()函数：只要在LOAD_PREVIOUS_POSE_GRAPH有，即我们有原来的地图信息，加载的时候，才会发生。
+
+addKeyFrame()函数：外部调用类pose_graph的第一个函数。即通过findConnection()函数判断是否有检测到回环，检测到后满足一定条件就把回环帧的序号添加optimize_buf内部。
+
+在整个回环检测程序中都是为了维护main函数里面定义的全局变量posegraph来进行的.这里面重要的成员变量为:
+
+list<KeyFrame*>keyframelist: 这是最重要的类成员,整个回环检测的过程就是用来维护这个关键帧链表list,当检测到回环的时候,更新这个链表的数据,即关键帧的位姿.
+
+BriefDatabase db:图像数据库信息,通过不断更新这个数据库,可以用来查询,即回环检测有没有回到之前曾经来过的地方.
+
+- 首先在main()函数中会调用loadVocabulary()函数.
+
+- 然后如果要加载地图则会调用loadPoseGraph()函数.
+
+  - 首先读取一些列文件,然后准备加载所有的Keyframe.
+  - 在读取了Keyframe的参数后,构造Keyframe.
+  - 调用loadKeyFrame()函数
+    - 然后在这里面会用到flag_detect_loop这个标志,如果是加载则为0,如果是新建则为1.那么我们是新建的Keyframe,则需要调用detectLoop()函数.在这个函数中我们能够获得具有最小index的历史关键帧.
+    - 得到上面的匹配关键帧后,通过计算相对位姿,我们可以把当前帧号记录到全局优化中.
+
+- 开启一个新线程process().这个函数只有当image_buf,pose_buf和point_buf三个buf都不为空的时候才进行运行,否则程序就休息5毫秒,继续检测.
+
+  其中image_buf存放的是image_callback()图像回调函数的信息,接收相机话题的原始图片.并且当两张图片的时间戳相差1秒,或者说当图片的时间戳小于上一帧的时间戳,可以认为图像出现新序列,因此new_sequence().
+
+  point_buf存放的是point_callback()关键帧的三维特征点信息的回调.并且在这三个回调函数中,同时利用point_cloud标准数据结构发布特征点三维点云以供可视化操作.
+
+  pose_buf存放的是pose_callback()回调函数的信息.这里面是vio得到的关键帧的位姿信息.
+
+  从上面的信息我们可以看出,只有当相机有关键帧的时候,才会进行进一步处理,整个loop_fusion处理的信息不是原始图像,而是一帧帧关键帧.
+
+  - 接着程序开始找一帧Keyframe对应image_buf,point_buf和pose_buf三者的数据.即point_buf和pose_buf整个储存的点云和位姿是对应image_buf里面的哪一帧关键帧.最终的结果是
+    1. image_msg存放关键帧的图像原始信息.
+    2. point_msg存放了该关键帧里面的3D点云信息,由VIO以及pose_graph.r_drift和pose_graph.t_drift解算得到.
+    3. pose_msg存放了该关键帧的位置
+
+  - 根据上面得到的三个信息来构造关键帧.用数据结构KeyFrame来表示,这里先跳过了前十个数据.在这个KeyFrame的构造函数中默认没有brief_descriptor,因为我们VIO前端提取时并不需要特征点的描述子.在构造关键帧的时候,函数同时又增加了阈值大于20的FAST角点,来增加关键帧特征点的数量,同时对这些特征点用相应的描述子来进行表述.
+
+    **注意只有当两个关键帧之间的位移量大于SKIP_DIS的时候才会构造新的关键帧.但是程序默认的SKIP_DIS为0.**
+
+  - 构造好的Keyframe通过posegraph.addKeyFrame()加入到全局姿态图中去.这其中第二个参数代表需要回环检测detect_loop,这里直接默认需要.
