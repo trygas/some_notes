@@ -305,4 +305,14 @@ BriefDatabase db:图像数据库信息,通过不断更新这个数据库,可以�
 
     **注意只有当两个关键帧之间的位移量大于SKIP_DIS的时候才会构造新的关键帧.但是程序默认的SKIP_DIS为0.**
 
-  - 构造好的Keyframe通过posegraph.addKeyFrame()加入到全局姿态图中去.这其中第二个参数代表需要回环检测detect_loop,这里直接默认需要.
+- 构造好的Keyframe通过posegraph.addKeyFrame()加入到全局姿态图中去.这其中第二个参数代表需要回环检测detect_loop,这里直接默认需要.
+
+  - 检测该关键帧的序号是否有跳变,整个loop_fusion里面,每次出现new_sequence()的时候,关键帧的sequence会自增1,为什么一直要关心一个关键帧的sequence呢?因为这里一个关键帧的位姿的参考系是建立在某一个sequence下面的,不同的sequence对应了不同的w_t_vio,w_r_vio,就是该sequence和base_sequence之间坐标系的转换.
+  - posegraph坐标系是以world frame作为坐标系的，world frame为base sequence(载入原来的图像数据库)或者（没有载入图像数据库的话）用sequence=1的序列作为坐标系。PoesGraph里面的两个类成员 w_t_vio,w_r_vio描述的就是当前序列的第一帧，与世界坐标系之间的转换关系。
+  - 通过detectLoop()，查找到一个最合适得分最高的闭环候选帧（如果没找到，loop_index=-1）,此时本质是通过bag of word中的db.query()来进行查找的。并且无论有没有查找到，都用db.add()把当前关键帧的描述子添加到图像的数据库db中去。
+  - 若detectLoop()能够找到相似的一帧，此时，通过findConnection() 判断新旧两帧关联，匹配点大于25对，相对的偏航角位移小于30度并且相对位移少于20m，则返回true,其余情况均返回false。在true的条件下，更新参考系转化的变量。并且把当前帧的序号加入到optimize_buf中去。
+  - 最终，把该帧keyframe 添加到keyframelist中去。从此，keyframelist又增添了一个关键帧元素。
+
+这个时候optimize_buf就放入了刚刚存进去的Keyframe,就会开始调用optimize4DOF()函数.
+
+不过这里只优化4个参数,即yaw角度,x,y,z.
